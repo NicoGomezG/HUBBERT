@@ -1,0 +1,16 @@
+{
+  "name": "hubbert",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "db:generate": "pnpm --filter @hubbert/db generate",
+    "db:push": "pnpm --filter @hubbert/db push",
+    "db:migrate": "pnpm --filter @hubbert/db migrate",
+    "db:studio": "pnpm --filter @hubbert/db studio"
+  }
+}

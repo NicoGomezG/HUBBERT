@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Usuario autenticado vía Discord OAuth2 (Supabase Auth).
+model User {
+  id          String   @id @default(uuid())
+  discordId   String   @unique
+  username    String
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime @default(now())
+
+  memberships GuildMember[]
+  embeds      Embed[]
+  birthdays   Birthday[]
+
+  @@map("users")
+}
+
+/// Servidor de Discord conocido por la plataforma. Existe una fila
+/// aunque el bot ya no esté instalado (botInstalledAt queda null).
+model Guild {
+  id             String   @id
+  name           String
+  iconUrl        String?
+  ownerDiscordId String
+  botInstalledAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  members   GuildMember[]
+  settings  GuildSettings?
+  embeds    Embed[]
+  birthdays Birthday[]
+
+  @@map("guilds")
+}
+
+/// Relación usuario-guild + foto de permisos tomada en el último login.
+/// No es la fuente de verdad de autorización: ver packages/discord/permissions.
+model GuildMember {
+  id            String   @id @default(uuid())
+  userId        String
+  guildId       String
+  permissions   BigInt
+  isOwner       Boolean  @default(false)
+  lastSyncedAt  DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, guildId])
+  @@index([guildId])
+  @@map("guild_members")
+}
+
+/// Configuración general de un servidor. 1:1 con Guild.
+model GuildSettings {
+  guildId          String   @id
+  timezone         String   @default("UTC")
+  defaultChannelId String?
+  enabledModules   String[] @default(["embeds", "birthdays"])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("guild_settings")
+}
+
+/// Embed guardado y reutilizable de un servidor.
+model Embed {
+  id             String   @id @default(uuid())
+  guildId        String
+  name           String
+  title          String?
+  description    String?
+  url            String?
+  color          Int?
+  authorName     String?
+  authorUrl      String?
+  authorIconUrl  String?
+  imageUrl       String?
+  thumbnailUrl   String?
+  footerText     String?
+  footerIconUrl  String?
+  showTimestamp  Boolean  @default(false)
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastSentAt     DateTime?
+
+  guild  Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author User        @relation(fields: [createdBy], references: [id])
+  fields EmbedField[]
+
+  @@index([guildId])
+  @@map("embeds")
+}
+
+model EmbedField {
+  id       String  @id @default(uuid())
+  embedId  String
+  name     String
+  value    String
+  inline   Boolean @default(false)
+  position Int
+
+  embed Embed @relation(fields: [embedId], references: [id], onDelete: Cascade)
+
+  @@index([embedId])
+  @@map("embed_fields")
+}
+
+/// Registro de cumpleaños de un miembro del servidor.
+model Birthday {
+  id             String   @id @default(uuid())
+  guildId        String
+  discordUserId  String
+  displayName    String
+  day            Int
+  month          Int
+  year           Int?
+  channelId      String?
+  customMessage  String?
+  isActive       Boolean  @default(true)
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  guild         Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  creator       User                   @relation(fields: [createdBy], references: [id])
+  notifications BirthdayNotification[]
+
+  @@unique([guildId, discordUserId])
+  @@index([guildId, month, day])
+  @@map("birthdays")
+}
+
+/// Registro idempotente de una felicitación enviada. El índice único
+/// (birthdayId, notificationDate) es lo que impide el doble envío.
+model BirthdayNotification {
+  id               String    @id @default(uuid())
+  birthdayId       String
+  /// Denormalizado a propósito: filtrar/indexar por guild sin join,
+  /// y defensa en profundidad si se consulta esta tabla directamente.
+  guildId          String
+  notificationDate DateTime  @db.Date
+  sentAt           DateTime?
+  status           String    @default("pending")
+  errorMessage     String?
+
+  birthday Birthday @relation(fields: [birthdayId], references: [id], onDelete: Cascade)
+
+  @@unique([birthdayId, notificationDate])
+  @@index([guildId])
+  @@map("birthday_notifications")
+}
