@@ -7,6 +7,7 @@ const TABS = [
   { slug: "embeds", label: "Embeds" },
   { slug: "birthdays", label: "Cumpleaños" },
   { slug: "settings", label: "Configuración" },
+  { slug: "ayuda", label: "Ayuda" },
 ] as const;
 
 export function GuildNav({ guildId }: { guildId: string }) {

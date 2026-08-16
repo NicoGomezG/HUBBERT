@@ -1,0 +1,64 @@
+const SECTIONS = [
+  {
+    title: "Embeds",
+    steps: [
+      "Ve a la pestaña Embeds y haz clic en \"+ Nuevo embed\".",
+      "Completa título, descripción, color y los fields que quieras.",
+      "Guarda el embed y elige a qué canal enviarlo.",
+      "Puedes reenviarlo cuando quieras: queda guardado para reutilizarlo.",
+    ],
+  },
+  {
+    title: "Cumpleaños",
+    steps: [
+      "Ve a la pestaña Cumpleaños y haz clic en \"+ Nuevo cumpleaños\".",
+      "Elige el usuario, la fecha y el canal donde se va a publicar el saludo.",
+      "Hubbert publica el mensaje de felicitación automáticamente el día que corresponde.",
+      "Puedes desactivar un cumpleaños sin borrarlo, o editarlo cuando quieras.",
+    ],
+  },
+  {
+    title: "Configuración",
+    steps: [
+      "Ve a la pestaña Configuración para definir la zona horaria del servidor.",
+      "Elige un canal por defecto para los mensajes que no especifican uno propio.",
+      "Estos ajustes aplican a todas las automatizaciones del bot en este servidor.",
+    ],
+  },
+] as const;
+
+export default function AyudaPage() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          Cómo usar Hubbert
+        </h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Hubbert no usa comandos de Discord — todo se configura aquí, desde el panel.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {SECTIONS.map((section) => (
+          <div
+            key={section.title}
+            className="rounded-md border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+          >
+            <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              {section.title}
+            </h3>
+            <ol className="flex flex-col gap-2 text-sm text-zinc-600 dark:text-zinc-300">
+              {section.steps.map((step, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-zinc-400 dark:text-zinc-600">{i + 1}.</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

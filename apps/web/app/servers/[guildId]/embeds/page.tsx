@@ -15,7 +15,7 @@ export default async function EmbedsPage({
         <div>
           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Embeds</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Creá, guardá y enviá embeds a los canales de este servidor.
+            Crea, guarda y envía embeds a los canales de este servidor.
           </p>
         </div>
         <Link

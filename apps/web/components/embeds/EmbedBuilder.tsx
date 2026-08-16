@@ -388,7 +388,7 @@ export function EmbedBuilder({
             type="button"
             onClick={handleSend}
             disabled={!embedId || !channelId || sending}
-            title={!embedId ? "Guardá el embed primero" : undefined}
+            title={!embedId ? "Guarda el embed primero" : undefined}
             className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4] disabled:opacity-50"
           >
             {sending ? "Enviando…" : "Enviar a Discord"}

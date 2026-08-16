@@ -23,7 +23,7 @@ export default function LoginPage() {
           Hubbert
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Iniciá sesión para administrar los servidores donde tenés permisos.
+          Inicia sesión para administrar los servidores donde tienes permisos.
         </p>
         <button
           onClick={handleLogin}

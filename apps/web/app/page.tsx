@@ -7,7 +7,7 @@ const FEATURES = [
   {
     title: "Embeds",
     description:
-      "Diseñá y enviá mensajes con embeds personalizados a cualquier canal de tu servidor.",
+      "Diseña y envía mensajes con embeds personalizados a cualquier canal de tu servidor.",
   },
   {
     title: "Cumpleaños",

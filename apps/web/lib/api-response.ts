@@ -11,11 +11,11 @@ export function apiError(code: string, message: string, status: number) {
 export function guildAccessErrorResponse(reason: "unauthenticated" | "not_member" | "bot_not_installed") {
   switch (reason) {
     case "unauthenticated":
-      return apiError("UNAUTHENTICATED", "Necesitás iniciar sesión.", 401);
+      return apiError("UNAUTHENTICATED", "Necesitas iniciar sesión.", 401);
     case "not_member":
       return apiError(
         "GUILD_ACCESS_DENIED",
-        "No tenés permisos para administrar este servidor.",
+        "No tienes permisos para administrar este servidor.",
         403
       );
     case "bot_not_installed":

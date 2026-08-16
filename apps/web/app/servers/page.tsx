@@ -42,7 +42,7 @@ export default async function ServersPage() {
             Tus servidores
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Servidores donde tenés permiso de administrador y podés configurar Hubbert.
+            Servidores donde tienes permiso de administrador y puedes configurar Hubbert.
           </p>
         </div>
         <form action={refreshBotPresence}>

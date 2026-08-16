@@ -14,7 +14,7 @@ export async function POST(
   const json = await request.json().catch(() => null);
   const parsed = sendEmbedSchema.safeParse(json);
   if (!parsed.success) {
-    return apiError("VALIDATION_ERROR", "Elegí un canal.", 400);
+    return apiError("VALIDATION_ERROR", "Elige un canal.", 400);
   }
 
   try {

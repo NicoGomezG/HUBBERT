@@ -80,7 +80,7 @@ export function EmbedPreview({ data }: { data: EmbedPreviewData }) {
 
           {isEmpty && (
             <p className="text-sm italic text-zinc-500">
-              El embed está vacío — completá título, descripción o un field.
+              El embed está vacío — completa título, descripción o un field.
             </p>
           )}
         </div>
