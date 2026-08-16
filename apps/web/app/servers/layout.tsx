@@ -1,8 +1,14 @@
+import Image from "next/image";
+import Link from "next/link";
+
 export default function ServersLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
       <header className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-50">Hubbert</span>
+        <Link href="/servers" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="" width={28} height={28} />
+          <span className="font-semibold text-zinc-900 dark:text-zinc-50">Hubbert</span>
+        </Link>
         <form action="/auth/signout" method="post">
           <button
             type="submit"

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@hubbert/db";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { refreshBotPresence } from "./actions";
@@ -78,9 +79,12 @@ export default async function ServersPage() {
               </span>
             </div>
             {guild.botInstalledAt ? (
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
-                Bot instalado
-              </span>
+              <Link
+                href={`/servers/${guild.id}`}
+                className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:hover:bg-emerald-900"
+              >
+                Configurar →
+              </Link>
             ) : (
               <a
                 href={botInviteUrl(guild.id)}

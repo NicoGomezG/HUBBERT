@@ -6,7 +6,8 @@
   "types": "src/index.ts",
   "dependencies": {
     "@hubbert/db": "workspace:*",
-    "@hubbert/discord": "workspace:*"
+    "@hubbert/discord": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "^5.6.0"
