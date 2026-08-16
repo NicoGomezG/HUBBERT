@@ -10,9 +10,6 @@ out/
 .env.local
 .env.*.local
 
-# Prisma
-packages/db/generated/
-
 # Build
 dist/
 
