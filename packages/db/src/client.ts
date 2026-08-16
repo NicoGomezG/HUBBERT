@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/client";
 
 // Evita crear un PrismaClient nuevo en cada hot-reload de dev / cada
 // invocación fría de una función serverless que reutiliza el mismo
