@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { checkDatabaseConnection } from "@/lib/health";
 
 export default async function Home() {
@@ -28,6 +29,12 @@ export default async function Home() {
             {db.error}
           </p>
         )}
+        <Link
+          href="/login"
+          className="text-center text-sm font-medium text-[#5865F2] hover:underline"
+        >
+          Ir al login →
+        </Link>
       </div>
     </main>
   );
