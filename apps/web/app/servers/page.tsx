@@ -34,6 +34,9 @@ export default async function ServersPage() {
       })
     : [];
 
+  const installedMemberships = memberships.filter(({ guild }) => guild.botInstalledAt);
+  const pendingMemberships = memberships.filter(({ guild }) => !guild.botInstalledAt);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
@@ -61,43 +64,75 @@ export default async function ServersPage() {
         </p>
       )}
 
-      <ul className="flex flex-col gap-3">
-        {memberships.map(({ guild }) => (
-          <li
-            key={guild.id}
-            className="flex items-center justify-between rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-          >
-            <div className="flex items-center gap-3">
-              {guild.iconUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={guild.iconUrl} alt="" className="h-8 w-8 rounded-full" />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-zinc-200 dark:bg-zinc-800" />
-              )}
-              <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                {guild.name}
-              </span>
-            </div>
-            {guild.botInstalledAt ? (
-              <Link
-                href={`/servers/${guild.id}`}
-                className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:hover:bg-emerald-900"
+      {installedMemberships.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            Con Hubbert instalado
+          </h2>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {installedMemberships.map(({ guild }) => (
+              <li
+                key={guild.id}
+                className="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900 dark:bg-emerald-950/20"
               >
-                Configurar →
-              </Link>
-            ) : (
-              <a
-                href={botInviteUrl(guild.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full bg-[#5865F2] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4752C4]"
+                <div className="flex items-center gap-3">
+                  {guild.iconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={guild.iconUrl} alt="" className="h-8 w-8 rounded-full" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+                  )}
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                    {guild.name}
+                  </span>
+                </div>
+                <Link
+                  href={`/servers/${guild.id}`}
+                  className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:hover:bg-emerald-900"
+                >
+                  Configurar →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {pendingMemberships.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            Sin Hubbert instalado
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {pendingMemberships.map(({ guild }) => (
+              <li
+                key={guild.id}
+                className="flex items-center justify-between rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
               >
-                Invitar bot
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
+                <div className="flex items-center gap-3">
+                  {guild.iconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={guild.iconUrl} alt="" className="h-8 w-8 rounded-full" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+                  )}
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                    {guild.name}
+                  </span>
+                </div>
+                <a
+                  href={botInviteUrl(guild.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-[#5865F2] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4752C4]"
+                >
+                  Invitar bot
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
