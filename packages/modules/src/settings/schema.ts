@@ -7,6 +7,11 @@ export const guildSettingsInputSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v ? v : null)),
+  ticketCategoryId: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => (v ? v : null)),
 });
 
 export type GuildSettingsInput = z.infer<typeof guildSettingsInputSchema>;

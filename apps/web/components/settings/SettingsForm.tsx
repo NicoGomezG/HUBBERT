@@ -11,17 +11,22 @@ export function SettingsForm({
   guildId,
   timezones,
   channels,
+  categories,
   initialTimezone,
   initialChannelId,
+  initialTicketCategoryId,
 }: {
   guildId: string;
   timezones: string[];
   channels: Channel[];
+  categories: Channel[];
   initialTimezone: string;
   initialChannelId: string | null;
+  initialTicketCategoryId: string | null;
 }) {
   const [timezone, setTimezone] = useState(initialTimezone);
   const [defaultChannelId, setDefaultChannelId] = useState(initialChannelId ?? "");
+  const [ticketCategoryId, setTicketCategoryId] = useState(initialTicketCategoryId ?? "");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -35,7 +40,11 @@ export function SettingsForm({
     const res = await fetch(`/api/guilds/${guildId}/settings`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ timezone, defaultChannelId: defaultChannelId || null }),
+      body: JSON.stringify({
+        timezone,
+        defaultChannelId: defaultChannelId || null,
+        ticketCategoryId: ticketCategoryId || null,
+      }),
     });
     const json = await res.json();
     setSaving(false);
@@ -121,6 +130,25 @@ export function SettingsForm({
             {testMessage.text}
           </p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Categoría para tickets</label>
+        <select
+          className={inputClass}
+          value={ticketCategoryId}
+          onChange={(e) => setTicketCategoryId(e.target.value)}
+        >
+          <option value="">Sin categoría</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Los canales privados de los tickets se crean dentro de esta categoría, si eliges una.
+        </p>
       </div>
 
       {message && (

@@ -1,5 +1,5 @@
 import { getGuildSettings } from "@hubbert/modules";
-import { fetchGuildTextChannels } from "@hubbert/discord";
+import { fetchGuildCategories, fetchGuildTextChannels } from "@hubbert/discord";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 
 const COMMON_TIMEZONES = [
@@ -28,9 +28,10 @@ export default async function SettingsPage({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
-  const [settings, channels] = await Promise.all([
+  const [settings, channels, categories] = await Promise.all([
     getGuildSettings(guildId),
     fetchGuildTextChannels(guildId),
+    fetchGuildCategories(guildId),
   ]);
 
   return (
@@ -45,8 +46,10 @@ export default async function SettingsPage({
         guildId={guildId}
         timezones={getTimezones()}
         channels={channels}
+        categories={categories}
         initialTimezone={settings.timezone}
         initialChannelId={settings.defaultChannelId}
+        initialTicketCategoryId={settings.ticketCategoryId}
       />
     </div>
   );

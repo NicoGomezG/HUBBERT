@@ -1,4 +1,7 @@
 import { createPublicKey, verify } from "node:crypto";
+import { Routes } from "discord-api-types/v10";
+import type { RESTPatchAPIWebhookWithTokenMessageJSONBody } from "discord-api-types/v10";
+import { getDiscordRest } from "./client";
 
 // Discord manda la public key como 32 bytes raw (hex). Node necesita la key
 // envuelta en DER/SPKI para poder usarla con crypto.verify — este prefijo es
@@ -23,4 +26,13 @@ export function verifyDiscordRequest(
   } catch {
     return false;
   }
+}
+
+/** Edita la respuesta original de una interacción — usado tras un deferred response (type 5/6). */
+export async function editOriginalInteractionResponse(
+  applicationId: string,
+  interactionToken: string,
+  body: RESTPatchAPIWebhookWithTokenMessageJSONBody
+): Promise<void> {
+  await getDiscordRest().patch(Routes.webhookMessage(applicationId, interactionToken, "@original"), { body });
 }

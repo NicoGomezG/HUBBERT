@@ -18,6 +18,16 @@ const SECTIONS = [
     ],
   },
   {
+    title: "Tickets",
+    steps: [
+      "Ve a la pestaña Tickets y haz clic en \"+ Nuevo panel\".",
+      "Completa título, descripción, texto del botón y el canal donde publicarlo — se publica al guardar.",
+      "Cualquier miembro puede hacer clic en el botón del panel para abrir su ticket: se crea un canal privado, visible solo para esa persona y los roles con permiso de administrador.",
+      "Desde dentro del canal, el creador del ticket o el staff pueden cerrarlo con el botón \"Cerrar ticket\" (borra el canal). También puedes cerrarlo desde el dashboard.",
+      "El dashboard solo muestra metadata del ticket (quién, cuándo, estado) — la conversación en sí queda en Discord.",
+    ],
+  },
+  {
     title: "Configuración",
     steps: [
       "Ve a la pestaña Configuración para definir la zona horaria del servidor.",
@@ -29,6 +39,7 @@ const SECTIONS = [
     title: "Comandos de Discord",
     steps: [
       "Usa /blist en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
+      "Usa /dashboard para obtener el link del panel y agregar el servidor o cumpleaños.",
       "Usa /help para ver todos los comandos disponibles del bot.",
       "El día 1 de cada mes, Hubbert publica automáticamente los cumpleaños de ese mes en el canal por defecto (configúralo en la pestaña Configuración).",
     ],
@@ -43,7 +54,7 @@ export default function AyudaPage() {
           Cómo usar Hubbert
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Casi todo se configura aquí, desde el panel. Solo /blist y /help se usan directamente en Discord.
+          Casi todo se configura aquí, desde el panel. Solo /blist, /dashboard y /help se usan directamente en Discord.
         </p>
       </div>
 

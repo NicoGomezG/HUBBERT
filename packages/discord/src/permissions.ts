@@ -3,6 +3,8 @@
 export const PERMISSION_BITS = {
   ADMINISTRATOR: BigInt(0x8),
   MANAGE_GUILD: BigInt(0x20),
+  VIEW_CHANNEL: BigInt(0x400),
+  SEND_MESSAGES: BigInt(0x800),
 } as const;
 
 export function hasManageAccess(permissions: bigint): boolean {

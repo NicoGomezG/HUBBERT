@@ -12,7 +12,16 @@ export async function getGuildSettings(guildId: string) {
 export async function updateGuildSettings(guildId: string, input: GuildSettingsInput) {
   return prisma.guildSettings.upsert({
     where: { guildId },
-    create: { guildId, timezone: input.timezone, defaultChannelId: input.defaultChannelId },
-    update: { timezone: input.timezone, defaultChannelId: input.defaultChannelId },
+    create: {
+      guildId,
+      timezone: input.timezone,
+      defaultChannelId: input.defaultChannelId,
+      ticketCategoryId: input.ticketCategoryId,
+    },
+    update: {
+      timezone: input.timezone,
+      defaultChannelId: input.defaultChannelId,
+      ticketCategoryId: input.ticketCategoryId,
+    },
   });
 }

@@ -27,3 +27,20 @@ export { sendDueBirthdayNotifications, type BirthdayRunSummary } from "./birthda
 export { BIRTHDAY_MESSAGE_VARIABLES, renderBirthdayMessage } from "./birthdays/message";
 export { formatBirthdayLine, formatBirthdayList, monthName, type BirthdayListItem } from "./birthdays/format";
 export { sendMonthlyBirthdaySummary, type MonthlyBirthdaySummary } from "./birthdays/monthly";
+export {
+  listPanels,
+  listTickets,
+  getPanel,
+  createPanel,
+  deletePanel,
+  findOpenTicketForUser,
+  openTicket,
+  closeTicket,
+  parseOpenTicketCustomId,
+  CLOSE_TICKET_CUSTOM_ID,
+  TicketPanelNotFoundError,
+  TicketNotFoundError,
+  TicketForbiddenError,
+  TicketAlreadyOpenError,
+} from "./tickets/service";
+export { ticketPanelInputSchema, type TicketPanelInput } from "./tickets/schema";

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { slug: "embeds", label: "Embeds" },
   { slug: "birthdays", label: "Cumpleaños" },
+  { slug: "tickets", label: "Tickets" },
   { slug: "settings", label: "Configuración" },
   { slug: "ayuda", label: "Ayuda" },
 ] as const;

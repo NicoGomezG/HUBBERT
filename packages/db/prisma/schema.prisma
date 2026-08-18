@@ -18,9 +18,10 @@ model User {
   createdAt   DateTime @default(now())
   lastLoginAt DateTime @default(now())
 
-  memberships GuildMember[]
-  embeds      Embed[]
-  birthdays   Birthday[]
+  memberships  GuildMember[]
+  embeds       Embed[]
+  birthdays    Birthday[]
+  ticketPanels TicketPanel[]
 
   @@map("users")
 }
@@ -28,18 +29,20 @@ model User {
 /// Servidor de Discord conocido por la plataforma. Existe una fila
 /// aunque el bot ya no esté instalado (botInstalledAt queda null).
 model Guild {
-  id             String   @id
+  id             String    @id
   name           String
   iconUrl        String?
   ownerDiscordId String?
   botInstalledAt DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  members   GuildMember[]
-  settings  GuildSettings?
-  embeds    Embed[]
-  birthdays Birthday[]
+  members      GuildMember[]
+  settings     GuildSettings?
+  embeds       Embed[]
+  birthdays    Birthday[]
+  ticketPanels TicketPanel[]
+  tickets      Ticket[]
 
   @@map("guilds")
 }
@@ -47,12 +50,12 @@ model Guild {
 /// Relación usuario-guild + foto de permisos tomada en el último login.
 /// No es la fuente de verdad de autorización: ver packages/discord/permissions.
 model GuildMember {
-  id            String   @id @default(uuid())
-  userId        String
-  guildId       String
-  permissions   BigInt
-  isOwner       Boolean  @default(false)
-  lastSyncedAt  DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  guildId      String
+  permissions  BigInt
+  isOwner      Boolean  @default(false)
+  lastSyncedAt DateTime @default(now())
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
@@ -67,6 +70,7 @@ model GuildSettings {
   guildId          String   @id
   timezone         String   @default("UTC")
   defaultChannelId String?
+  ticketCategoryId String?
   enabledModules   String[] @default(["embeds", "birthdays"])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -78,28 +82,28 @@ model GuildSettings {
 
 /// Embed guardado y reutilizable de un servidor.
 model Embed {
-  id             String   @id @default(uuid())
-  guildId        String
-  name           String
-  title          String?
-  description    String?
-  url            String?
-  color          Int?
-  authorName     String?
-  authorUrl      String?
-  authorIconUrl  String?
-  imageUrl       String?
-  thumbnailUrl   String?
-  footerText     String?
-  footerIconUrl  String?
-  showTimestamp  Boolean  @default(false)
-  createdBy      String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  lastSentAt     DateTime?
+  id            String    @id @default(uuid())
+  guildId       String
+  name          String
+  title         String?
+  description   String?
+  url           String?
+  color         Int?
+  authorName    String?
+  authorUrl     String?
+  authorIconUrl String?
+  imageUrl      String?
+  thumbnailUrl  String?
+  footerText    String?
+  footerIconUrl String?
+  showTimestamp Boolean   @default(false)
+  createdBy     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastSentAt    DateTime?
 
-  guild  Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
-  author User        @relation(fields: [createdBy], references: [id])
+  guild  Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author User         @relation(fields: [createdBy], references: [id])
   fields EmbedField[]
 
   @@index([guildId])
@@ -122,19 +126,19 @@ model EmbedField {
 
 /// Registro de cumpleaños de un miembro del servidor.
 model Birthday {
-  id             String   @id @default(uuid())
-  guildId        String
-  discordUserId  String
-  displayName    String
-  day            Int
-  month          Int
-  year           Int?
-  channelId      String?
-  customMessage  String?
-  isActive       Boolean  @default(true)
-  createdBy      String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(uuid())
+  guildId       String
+  discordUserId String
+  displayName   String
+  day           Int
+  month         Int
+  year          Int?
+  channelId     String?
+  customMessage String?
+  isActive      Boolean  @default(true)
+  createdBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   guild         Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
   creator       User                   @relation(fields: [createdBy], references: [id])
@@ -163,4 +167,45 @@ model BirthdayNotification {
   @@unique([birthdayId, notificationDate])
   @@index([guildId])
   @@map("birthday_notifications")
+}
+
+/// Panel publicado en un canal con un botón "Abrir ticket". Una fila = un
+/// mensaje publicado (no hay reenvío/edición, para simplificar el alcance).
+model TicketPanel {
+  id          String   @id @default(uuid())
+  guildId     String
+  channelId   String
+  messageId   String
+  title       String
+  description String?
+  buttonLabel String   @default("Abrir ticket")
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  guild   Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  creator User     @relation(fields: [createdBy], references: [id])
+  tickets Ticket[]
+
+  @@index([guildId])
+  @@map("ticket_panels")
+}
+
+/// Canal privado de soporte abierto por un miembro desde un panel.
+model Ticket {
+  id                    String    @id @default(uuid())
+  guildId               String
+  panelId               String?
+  channelId             String    @unique
+  discordUserId         String
+  displayName           String
+  status                String    @default("open")
+  createdAt             DateTime  @default(now())
+  closedAt              DateTime?
+  closedByDiscordUserId String?
+
+  guild Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  panel TicketPanel? @relation(fields: [panelId], references: [id], onDelete: SetNull)
+
+  @@index([guildId, status])
+  @@map("tickets")
 }

@@ -13,6 +13,11 @@ export const DISCORD_COMMANDS = [
     description: "Muestra los comandos disponibles del bot",
     type: 1,
   },
+  {
+    name: "dashboard",
+    description: "Muestra el link del panel para integrar el servidor y gestionar cumpleaños",
+    type: 1,
+  },
 ] as const;
 
 export async function registerGlobalCommands(applicationId: string): Promise<void> {

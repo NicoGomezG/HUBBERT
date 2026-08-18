@@ -1,5 +1,5 @@
 export { getDiscordRest } from "./client";
-export { sendEmbedToChannel } from "./messages";
+export { sendEmbedToChannel, sendMessageToChannel, deleteMessage } from "./messages";
 export {
   buildDiscordEmbed,
   validateEmbedInput,
@@ -7,11 +7,20 @@ export {
   type EmbedInput,
   type EmbedFieldInput,
 } from "./embeds";
+export { buildButtonRow, type ButtonRowInput } from "./components";
 export { fetchUserGuilds, guildIconUrl, type DiscordOAuthGuild } from "./oauth";
 export { fetchBotGuildIds } from "./guilds";
-export { fetchGuildTextChannels, type DiscordTextChannel } from "./channels";
+export {
+  fetchGuildTextChannels,
+  fetchGuildCategories,
+  createTicketChannel,
+  deleteChannel,
+  type DiscordTextChannel,
+  type CreateTicketChannelInput,
+} from "./channels";
 export { fetchGuildMembers, type DiscordGuildMember } from "./members";
+export { fetchGuildManageRoles, type DiscordRole } from "./roles";
 export { translateDiscordError } from "./errors";
 export { hasManageAccess, PERMISSION_BITS } from "./permissions";
-export { verifyDiscordRequest } from "./interactions";
+export { verifyDiscordRequest, editOriginalInteractionResponse } from "./interactions";
 export { DISCORD_COMMANDS, registerGlobalCommands } from "./commands";
