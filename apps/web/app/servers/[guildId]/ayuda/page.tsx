@@ -25,6 +25,13 @@ const SECTIONS = [
       "Estos ajustes aplican a todas las automatizaciones del bot en este servidor.",
     ],
   },
+  {
+    title: "Comandos de Discord",
+    steps: [
+      "Usa /lista en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
+      "El día 1 de cada mes, Hubbert publica automáticamente los cumpleaños de ese mes en el canal por defecto (configúralo en la pestaña Configuración).",
+    ],
+  },
 ] as const;
 
 export default function AyudaPage() {
@@ -35,7 +42,7 @@ export default function AyudaPage() {
           Cómo usar Hubbert
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Hubbert no usa comandos de Discord — todo se configura aquí, desde el panel.
+          Casi todo se configura aquí, desde el panel. Solo /lista se usa directamente en Discord.
         </p>
       </div>
 

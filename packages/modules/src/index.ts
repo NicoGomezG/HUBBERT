@@ -25,3 +25,5 @@ export {
 export { birthdayInputSchema, type BirthdayInput } from "./birthdays/schema";
 export { sendDueBirthdayNotifications, type BirthdayRunSummary } from "./birthdays/notify";
 export { BIRTHDAY_MESSAGE_VARIABLES, renderBirthdayMessage } from "./birthdays/message";
+export { formatBirthdayLine, formatBirthdayList, monthName, type BirthdayListItem } from "./birthdays/format";
+export { sendMonthlyBirthdaySummary, type MonthlyBirthdaySummary } from "./birthdays/monthly";

@@ -13,3 +13,5 @@ export { fetchGuildTextChannels, type DiscordTextChannel } from "./channels";
 export { fetchGuildMembers, type DiscordGuildMember } from "./members";
 export { translateDiscordError } from "./errors";
 export { hasManageAccess, PERMISSION_BITS } from "./permissions";
+export { verifyDiscordRequest } from "./interactions";
+export { DISCORD_COMMANDS, registerGlobalCommands } from "./commands";
