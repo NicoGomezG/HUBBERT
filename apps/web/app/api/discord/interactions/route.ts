@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ type: InteractionResponseType.PONG });
   }
 
-  if (interaction.type === InteractionType.APPLICATION_COMMAND && interaction.data?.name === "lista") {
+  if (interaction.type === InteractionType.APPLICATION_COMMAND && interaction.data?.name === "blist") {
     if (!interaction.guild_id) {
       return NextResponse.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

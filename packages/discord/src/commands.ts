@@ -4,7 +4,7 @@ import { getDiscordRest } from "./client";
 // type: 1 = CHAT_INPUT (slash command).
 export const DISCORD_COMMANDS = [
   {
-    name: "lista",
+    name: "blist",
     description: "Muestra la lista completa de cumpleaños registrados en este servidor",
     type: 1,
   },

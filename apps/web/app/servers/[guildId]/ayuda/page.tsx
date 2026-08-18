@@ -28,7 +28,7 @@ const SECTIONS = [
   {
     title: "Comandos de Discord",
     steps: [
-      "Usa /lista en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
+      "Usa /blist en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
       "Usa /help para ver todos los comandos disponibles del bot.",
       "El día 1 de cada mes, Hubbert publica automáticamente los cumpleaños de ese mes en el canal por defecto (configúralo en la pestaña Configuración).",
     ],
@@ -43,7 +43,7 @@ export default function AyudaPage() {
           Cómo usar Hubbert
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Casi todo se configura aquí, desde el panel. Solo /lista se usa directamente en Discord.
+          Casi todo se configura aquí, desde el panel. Solo /blist y /help se usan directamente en Discord.
         </p>
       </div>
 
