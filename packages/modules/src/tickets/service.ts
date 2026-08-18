@@ -10,6 +10,7 @@ import {
   sendMessageToChannel,
 } from "@hubbert/discord";
 import { getGuildSettings } from "../settings/service";
+import { TICKET_WELCOME_DEFAULT, renderTicketWelcomeMessage } from "./message";
 import type { TicketPanelInput } from "./schema";
 
 export class TicketPanelNotFoundError extends Error {}
@@ -62,7 +63,8 @@ export async function getPanel(guildId: string, panelId: string) {
 
 export async function createPanel(guildId: string, userId: string, input: TicketPanelInput) {
   const panelId = randomUUID();
-  const embed = buildDiscordEmbed({ title: input.title, description: input.description, color: 0x5865f2 });
+  const color = input.color ?? 0x5865f2;
+  const embed = buildDiscordEmbed({ title: input.title, description: input.description, color });
 
   const message = await sendMessageToChannel(input.channelId, {
     embeds: [embed],
@@ -70,8 +72,8 @@ export async function createPanel(guildId: string, userId: string, input: Ticket
       buildButtonRow({
         customId: `${OPEN_TICKET_CUSTOM_ID_PREFIX}${panelId}`,
         label: input.buttonLabel,
-        style: "primary",
-        emoji: "🎫",
+        style: input.buttonStyle,
+        emoji: input.buttonEmoji,
       }),
     ],
   });
@@ -84,7 +86,11 @@ export async function createPanel(guildId: string, userId: string, input: Ticket
       messageId: message.id,
       title: input.title,
       description: input.description,
+      color,
       buttonLabel: input.buttonLabel,
+      buttonEmoji: input.buttonEmoji,
+      buttonStyle: input.buttonStyle,
+      welcomeMessage: input.welcomeMessage,
       createdBy: userId,
     },
   });
@@ -110,7 +116,7 @@ export async function openTicket(guildId: string, panelId: string, discordUserId
   const existing = await findOpenTicketForUser(guildId, discordUserId);
   if (existing) throw new TicketAlreadyOpenError(existing.channelId);
 
-  await getPanel(guildId, panelId); // valida que el panel pertenezca a esta guild
+  const panel = await getPanel(guildId, panelId); // valida que el panel pertenezca a esta guild
 
   const [manageRoles, settings] = await Promise.all([fetchGuildManageRoles(guildId), getGuildSettings(guildId)]);
 
@@ -127,10 +133,14 @@ export async function openTicket(guildId: string, panelId: string, discordUserId
       data: { guildId, panelId, channelId: channel.id, discordUserId, displayName },
     });
 
+    const welcomeText = renderTicketWelcomeMessage(panel.welcomeMessage ?? TICKET_WELCOME_DEFAULT, {
+      discordUserId,
+      displayName,
+    });
     const embed = buildDiscordEmbed({
-      title: "🎫 Ticket abierto",
-      description: `Gracias por escribir, ${displayName}. Un miembro del staff te va a responder acá.`,
-      color: 0x5865f2,
+      title: `${panel.buttonEmoji} Ticket abierto`,
+      description: welcomeText,
+      color: panel.color ?? 0x5865f2,
     });
     await sendMessageToChannel(channel.id, {
       embeds: [embed],

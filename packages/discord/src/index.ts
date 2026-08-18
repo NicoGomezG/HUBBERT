@@ -7,7 +7,7 @@ export {
   type EmbedInput,
   type EmbedFieldInput,
 } from "./embeds";
-export { buildButtonRow, type ButtonRowInput } from "./components";
+export { buildButtonRow, type ButtonRowInput, type ButtonRowStyle } from "./components";
 export { fetchUserGuilds, guildIconUrl, type DiscordOAuthGuild } from "./oauth";
 export { fetchBotGuildIds } from "./guilds";
 export {

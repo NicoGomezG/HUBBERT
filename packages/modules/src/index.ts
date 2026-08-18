@@ -44,3 +44,8 @@ export {
   TicketAlreadyOpenError,
 } from "./tickets/service";
 export { ticketPanelInputSchema, type TicketPanelInput } from "./tickets/schema";
+export {
+  TICKET_WELCOME_DEFAULT,
+  TICKET_MESSAGE_VARIABLES,
+  renderTicketWelcomeMessage,
+} from "./tickets/message";
