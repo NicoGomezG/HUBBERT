@@ -8,6 +8,11 @@ export const DISCORD_COMMANDS = [
     description: "Muestra la lista completa de cumpleaños registrados en este servidor",
     type: 1,
   },
+  {
+    name: "help",
+    description: "Muestra los comandos disponibles del bot",
+    type: 1,
+  },
 ] as const;
 
 export async function registerGlobalCommands(applicationId: string): Promise<void> {

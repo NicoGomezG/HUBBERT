@@ -29,6 +29,7 @@ const SECTIONS = [
     title: "Comandos de Discord",
     steps: [
       "Usa /lista en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
+      "Usa /help para ver todos los comandos disponibles del bot.",
       "El día 1 de cada mes, Hubbert publica automáticamente los cumpleaños de ese mes en el canal por defecto (configúralo en la pestaña Configuración).",
     ],
   },
