@@ -25,6 +25,8 @@ export async function toggleActiveAction(guildId: string, birthdayId: string) {
     year: birthday.year,
     channelId: birthday.channelId,
     customMessage: birthday.customMessage,
+    imageUrl: birthday.imageUrl,
+    color: birthday.color,
     isActive: !birthday.isActive,
   });
   revalidatePath(`/servers/${guildId}/birthdays`);

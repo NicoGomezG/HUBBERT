@@ -28,6 +28,19 @@ export const birthdayInputSchema = z
       .nullable()
       .optional()
       .transform((v) => (v ? v : null)),
+    imageUrl: z
+      .union([z.string().trim().url("La URL de la imagen no es válida").max(500), z.literal("")])
+      .nullable()
+      .optional()
+      .transform((v) => (v ? v : null)),
+    color: z
+      .number()
+      .int()
+      .min(0)
+      .max(0xffffff)
+      .nullable()
+      .optional()
+      .transform((v) => v ?? null),
     isActive: z.boolean().default(true),
   })
   .refine((data) => data.day <= DAYS_IN_MONTH[data.month - 1], {

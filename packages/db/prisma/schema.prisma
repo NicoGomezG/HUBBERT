@@ -135,6 +135,8 @@ model Birthday {
   year          Int?
   channelId     String?
   customMessage String?
+  imageUrl      String?
+  color         Int?
   isActive      Boolean  @default(true)
   createdBy     String
   createdAt     DateTime @default(now())

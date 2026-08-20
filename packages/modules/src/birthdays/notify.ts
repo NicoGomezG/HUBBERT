@@ -59,7 +59,14 @@ export async function sendDueBirthdayNotifications(now = new Date()): Promise<Bi
         guildName: birthday.guild.name,
         age,
       });
-      await sendEmbedToChannel(channelId, buildDiscordEmbed({ description, color: 0xffd54f }));
+      await sendEmbedToChannel(
+        channelId,
+        buildDiscordEmbed({
+          description,
+          color: birthday.color ?? 0xffd54f,
+          imageUrl: birthday.imageUrl,
+        })
+      );
 
       await prisma.birthdayNotification.updateMany({
         where: { birthdayId: birthday.id, notificationDate },

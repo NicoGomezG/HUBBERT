@@ -29,6 +29,8 @@ export interface BirthdayFormInitial {
   year: number | null;
   channelId: string | null;
   customMessage: string | null;
+  imageUrl: string | null;
+  color: number | null;
   isActive: boolean;
 }
 
@@ -49,6 +51,10 @@ export function BirthdayForm({
   const [channelId, setChannelId] = useState(initial?.channelId ?? "");
   const [customMessage, setCustomMessage] = useState(
     initial?.customMessage ?? "¡Feliz cumpleaños, {user}! 🎉"
+  );
+  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
+  const [color, setColor] = useState(
+    initial?.color != null ? `#${initial.color.toString(16).padStart(6, "0")}` : "#ffd54f"
   );
   const [isActive, setIsActive] = useState(initial?.isActive ?? true);
   const [saving, setSaving] = useState(false);
@@ -91,6 +97,8 @@ export function BirthdayForm({
       year: year ? Number(year) : null,
       channelId: channelId || null,
       customMessage: customMessage || null,
+      imageUrl: imageUrl || null,
+      color: parseInt(color.replace("#", ""), 16),
       isActive,
     };
 
@@ -200,6 +208,30 @@ export function BirthdayForm({
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Imagen del saludo (opcional)</label>
+        <input
+          type="url"
+          className={inputClass}
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="https://…"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Color del saludo</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            className="h-9 w-14 cursor-pointer rounded-md border border-zinc-300 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+          />
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">{color}</span>
+        </div>
       </div>
 
       <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
