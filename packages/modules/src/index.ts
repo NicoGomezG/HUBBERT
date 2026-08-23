@@ -28,6 +28,24 @@ export { BIRTHDAY_MESSAGE_VARIABLES, renderBirthdayMessage } from "./birthdays/m
 export { formatBirthdayLine, formatBirthdayList, monthName, type BirthdayListItem } from "./birthdays/format";
 export { sendMonthlyBirthdaySummary, type MonthlyBirthdaySummary } from "./birthdays/monthly";
 export {
+  listReminders,
+  getReminder,
+  createReminder,
+  updateReminder,
+  deleteReminder,
+  ReminderNotFoundError,
+} from "./reminders/service";
+export { reminderInputSchema, REPEAT_MODES, type ReminderInput } from "./reminders/schema";
+export { sendDueReminderNotifications, type ReminderRunSummary } from "./reminders/notify";
+export { REMINDER_MESSAGE_VARIABLES, renderReminderMessage, defaultReminderTemplate } from "./reminders/message";
+export {
+  formatReminderLine,
+  formatReminderList,
+  formatDateShort as formatReminderDate,
+  daysUntil as daysUntilReminder,
+  type ReminderListItem,
+} from "./reminders/format";
+export {
   listPanels,
   listTickets,
   getPanel,

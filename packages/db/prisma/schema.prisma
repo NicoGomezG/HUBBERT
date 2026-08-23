@@ -21,6 +21,7 @@ model User {
   memberships  GuildMember[]
   embeds       Embed[]
   birthdays    Birthday[]
+  reminders    Reminder[]
   ticketPanels TicketPanel[]
 
   @@map("users")
@@ -41,6 +42,7 @@ model Guild {
   settings     GuildSettings?
   embeds       Embed[]
   birthdays    Birthday[]
+  reminders    Reminder[]
   ticketPanels TicketPanel[]
   tickets      Ticket[]
 
@@ -169,6 +171,52 @@ model BirthdayNotification {
   @@unique([birthdayId, notificationDate])
   @@index([guildId])
   @@map("birthday_notifications")
+}
+
+/// Recordatorio personalizado (no cumpleaños) con anticipación configurable.
+model Reminder {
+  id            String   @id @default(uuid())
+  guildId       String
+  title         String
+  description   String?
+  targetDate    DateTime @db.Date
+  channelId     String?
+  daysBefore    Int      @default(1)
+  /// "daily": avisa todos los días desde daysBefore hasta el día del evento.
+  /// "once": avisa una sola vez, exactamente daysBefore días antes.
+  repeatMode    String   @default("daily")
+  customMessage String?
+  imageUrl      String?
+  color         Int?
+  isActive      Boolean  @default(true)
+  createdBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  guild         Guild                 @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  creator       User                  @relation(fields: [createdBy], references: [id])
+  notifications ReminderNotification[]
+
+  @@index([guildId, targetDate])
+  @@map("reminders")
+}
+
+/// Registro idempotente de un aviso de recordatorio enviado. El índice único
+/// (reminderId, notificationDate) impide el doble envío en el mismo día.
+model ReminderNotification {
+  id               String    @id @default(uuid())
+  reminderId       String
+  guildId          String
+  notificationDate DateTime  @db.Date
+  sentAt           DateTime?
+  status           String    @default("pending")
+  errorMessage     String?
+
+  reminder Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+
+  @@unique([reminderId, notificationDate])
+  @@index([guildId])
+  @@map("reminder_notifications")
 }
 
 /// Panel publicado en un canal con un botón "Abrir ticket". Una fila = un

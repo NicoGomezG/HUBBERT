@@ -18,6 +18,15 @@ const SECTIONS = [
     ],
   },
   {
+    title: "Recordatorios",
+    steps: [
+      "Ve a la pestaña Recordatorios y haz clic en \"+ Nuevo recordatorio\".",
+      "Completa un título, la fecha del evento y el canal donde se va a avisar.",
+      "Elige con cuántos días de anticipación quieres el aviso, y si querés que sea diario (por ejemplo, para estudiar para una prueba) o una sola vez (por ejemplo, una reunión importante).",
+      "Sirve para cualquier cosa más allá de cumpleaños: pruebas, reuniones, vencimientos, lo que necesites recordar.",
+    ],
+  },
+  {
     title: "Tickets",
     steps: [
       "Ve a la pestaña Tickets y haz clic en \"+ Nuevo panel\".",
@@ -39,7 +48,8 @@ const SECTIONS = [
     title: "Comandos de Discord",
     steps: [
       "Usa /blist en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",
-      "Usa /dashboard para obtener el link del panel y agregar el servidor o cumpleaños.",
+      "Usa /rlist en cualquier canal para ver la lista completa de recordatorios registrados en el servidor.",
+      "Usa /dashboard para obtener el link del panel y agregar el servidor, cumpleaños o recordatorios.",
       "Usa /help para ver todos los comandos disponibles del bot.",
       "El día 1 de cada mes, Hubbert publica automáticamente los cumpleaños de ese mes en el canal por defecto (configúralo en la pestaña Configuración).",
     ],
@@ -54,7 +64,7 @@ export default function AyudaPage() {
           Cómo usar Hubbert
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Casi todo se configura aquí, desde el panel. Solo /blist, /dashboard y /help se usan directamente en Discord.
+          Casi todo se configura aquí, desde el panel. Solo /blist, /rlist, /dashboard y /help se usan directamente en Discord.
         </p>
       </div>
 

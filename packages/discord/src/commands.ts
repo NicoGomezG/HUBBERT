@@ -9,6 +9,11 @@ export const DISCORD_COMMANDS = [
     type: 1,
   },
   {
+    name: "rlist",
+    description: "Muestra la lista de recordatorios registrados en este servidor",
+    type: 1,
+  },
+  {
     name: "help",
     description: "Muestra los comandos disponibles del bot",
     type: 1,
