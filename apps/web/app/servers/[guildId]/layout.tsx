@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Germania_One } from "next/font/google";
 import { getGuildAccess } from "@/lib/guild-access";
 import { GuildNav } from "@/components/GuildNav";
+
+// Fuente angular estilo runas nórdicas, como la tipografía de las camisetas
+// de la selección de Noruega (ej. "HAALAND").
+const germaniaOne = Germania_One({ weight: "400", subsets: ["latin"] });
 
 export default async function GuildLayout({
   children,
@@ -44,9 +49,16 @@ export default async function GuildLayout({
         ) : (
           <div className="h-9 w-9 rounded-full bg-zinc-200 dark:bg-zinc-800" />
         )}
-        <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          {access.guild.name}
-        </h1>
+        <div className="flex flex-col">
+          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            {access.guild.name}
+          </h1>
+          <span
+            className={`${germaniaOne.className} text-sm tracking-wide text-zinc-500 dark:text-zinc-400`}
+          >
+            by Nicogomez
+          </span>
+        </div>
       </div>
       <GuildNav guildId={guildId} />
       {children}
