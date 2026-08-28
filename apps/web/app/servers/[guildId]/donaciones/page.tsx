@@ -1,4 +1,4 @@
-const MERCADOPAGO_URL = "https://mpago.la/2w2FyRs";
+const MERCADOPAGO_URL = "https://link.mercadopago.cl/hubbertbot";
 
 const SUGGESTED_AMOUNTS = ["$2.000", "$5.000", "$10.000", "$20.000"] as const;
 
