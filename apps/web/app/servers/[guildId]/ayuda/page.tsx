@@ -45,6 +45,13 @@ const SECTIONS = [
     ],
   },
   {
+    title: "Donaciones",
+    steps: [
+      "Ve a la pestaña Donaciones para apoyar el desarrollo de Hubbert.",
+      "Encontrarás montos sugeridos y un botón para donar con Mercado Pago.",
+    ],
+  },
+  {
     title: "Comandos de Discord",
     steps: [
       "Usa /blist en cualquier canal para ver la lista completa de cumpleaños registrados en el servidor.",

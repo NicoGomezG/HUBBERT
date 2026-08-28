@@ -9,6 +9,7 @@ const TABS = [
   { slug: "reminders", label: "Recordatorios" },
   { slug: "tickets", label: "Tickets" },
   { slug: "settings", label: "Configuración" },
+  { slug: "donaciones", label: "Donaciones" },
   { slug: "ayuda", label: "Ayuda" },
 ] as const;
 
