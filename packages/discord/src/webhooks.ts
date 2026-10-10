@@ -2,12 +2,11 @@ import { Routes } from "discord-api-types/v10";
 import type {
   APIEmbed,
   APIMessage,
-  APIUser,
   APIWebhook,
   RESTPatchAPIWebhookWithTokenMessageJSONBody,
   RESTPostAPIWebhookWithTokenJSONBody,
 } from "discord-api-types/v10";
-import { getDiscordRest } from "./client";
+import { fetchBotUser, getDiscordRest } from "./client";
 
 const WEBHOOK_NAME = "Hubbert";
 
@@ -23,10 +22,10 @@ export interface WebhookSender {
  */
 async function getOrCreateChannelWebhook(channelId: string): Promise<{ id: string; token: string }> {
   const rest = getDiscordRest();
-  const [botUser, webhooks] = (await Promise.all([
-    rest.get(Routes.user()),
-    rest.get(Routes.channelWebhooks(channelId)),
-  ])) as [APIUser, APIWebhook[]];
+  const [botUser, webhooks] = await Promise.all([
+    fetchBotUser(),
+    rest.get(Routes.channelWebhooks(channelId)) as Promise<APIWebhook[]>,
+  ]);
 
   const existing = webhooks.find((w) => w.user?.id === botUser.id && w.token);
   if (existing?.token) return { id: existing.id, token: existing.token };

@@ -1,15 +1,12 @@
 import { Metal_Mania } from "next/font/google";
 import { prisma } from "@hubbert/db";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { Sidebar, type SidebarGuild, type SidebarUser } from "@/components/Sidebar";
 
 const metalMania = Metal_Mania({ weight: "400", subsets: ["latin"] });
 
 export default async function ServersLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const discordId = String(metadata.provider_id ?? "");

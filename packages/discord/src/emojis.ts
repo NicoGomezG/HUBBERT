@@ -1,6 +1,7 @@
 import { Routes } from "discord-api-types/v10";
 import type { APIEmoji } from "discord-api-types/v10";
 import { getDiscordRest } from "./client";
+import { cached, DISCORD_CACHE_TTL_MS } from "./cache";
 
 export interface ParsedEmoji {
   /** Como se escribe en un mensaje/embed: "🎮" o "<:nombre:123>". */
@@ -52,7 +53,11 @@ export function parseGatewayEmoji(emoji: { id: string | null; name: string | nul
 }
 
 export async function fetchGuildEmojis(guildId: string): Promise<DiscordGuildEmoji[]> {
-  const emojis = (await getDiscordRest().get(Routes.guildEmojis(guildId))) as APIEmoji[];
+  const emojis = await cached(
+    `emojis:${guildId}`,
+    DISCORD_CACHE_TTL_MS,
+    () => getDiscordRest().get(Routes.guildEmojis(guildId)) as Promise<APIEmoji[]>
+  );
 
   return emojis
     .filter((e): e is APIEmoji & { id: string; name: string } => Boolean(e.id && e.name) && e.available !== false)

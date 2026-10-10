@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@hubbert/db";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { refreshBotPresence } from "./actions";
 
 // View Channels, Send Messages, Embed Links, Read Message History, Add Reactions,
@@ -20,10 +20,7 @@ function botInviteUrl(guildId: string): string {
 }
 
 export default async function ServersPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   const discordId = String(
     (user?.user_metadata as Record<string, unknown> | undefined)?.provider_id ?? ""

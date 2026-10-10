@@ -1,6 +1,7 @@
 import { ChannelType, OverwriteType, Routes } from "discord-api-types/v10";
 import type { APIChannel } from "discord-api-types/v10";
 import { getDiscordRest } from "./client";
+import { cached, DISCORD_CACHE_TTL_MS, invalidateCached } from "./cache";
 import { PERMISSION_BITS } from "./permissions";
 
 export interface DiscordTextChannel {
@@ -9,8 +10,17 @@ export interface DiscordTextChannel {
   position: number;
 }
 
+/** Texto y categorías salen del mismo endpoint: una sola llamada cacheada sirve a ambos. */
+function fetchGuildChannels(guildId: string): Promise<APIChannel[]> {
+  return cached(
+    `channels:${guildId}`,
+    DISCORD_CACHE_TTL_MS,
+    () => getDiscordRest().get(Routes.guildChannels(guildId)) as Promise<APIChannel[]>
+  );
+}
+
 export async function fetchGuildTextChannels(guildId: string): Promise<DiscordTextChannel[]> {
-  const channels = (await getDiscordRest().get(Routes.guildChannels(guildId))) as APIChannel[];
+  const channels = await fetchGuildChannels(guildId);
 
   return channels
     .filter((c): c is APIChannel & { position: number } => c.type === ChannelType.GuildText)
@@ -19,7 +29,7 @@ export async function fetchGuildTextChannels(guildId: string): Promise<DiscordTe
 }
 
 export async function fetchGuildCategories(guildId: string): Promise<DiscordTextChannel[]> {
-  const channels = (await getDiscordRest().get(Routes.guildChannels(guildId))) as APIChannel[];
+  const channels = await fetchGuildChannels(guildId);
 
   return channels
     .filter((c): c is APIChannel & { position: number } => c.type === ChannelType.GuildCategory)
@@ -54,9 +64,11 @@ export async function createTicketChannel(input: CreateTicketChannelInput): Prom
     },
   })) as APIChannel;
 
+  invalidateCached(`channels:${input.guildId}`);
   return { id: channel.id };
 }
 
 export async function deleteChannel(channelId: string): Promise<void> {
-  await getDiscordRest().delete(Routes.channel(channelId));
+  const deleted = (await getDiscordRest().delete(Routes.channel(channelId))) as APIChannel;
+  if ("guild_id" in deleted && deleted.guild_id) invalidateCached(`channels:${deleted.guild_id}`);
 }

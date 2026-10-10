@@ -1,4 +1,6 @@
 import { REST } from "@discordjs/rest";
+import { Routes, type APIUser } from "discord-api-types/v10";
+import { cached } from "./cache";
 
 let rest: REST | undefined;
 
@@ -14,4 +16,9 @@ export function getDiscordRest(): REST {
     rest = new REST({ version: "10" }).setToken(token);
   }
   return rest;
+}
+
+/** El usuario del bot no cambia mientras el proceso vive: se pide una sola vez. */
+export function fetchBotUser(): Promise<APIUser> {
+  return cached("bot-user", Number.POSITIVE_INFINITY, () => getDiscordRest().get(Routes.user()) as Promise<APIUser>);
 }

@@ -25,11 +25,11 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims valida el JWT localmente (sin ida y vuelta a Supabase) y refresca
+  // la sesión si expiró; la validación completa la hacen las páginas.
+  const { data } = await supabase.auth.getClaims();
 
-  if (!user && request.nextUrl.pathname.startsWith("/servers")) {
+  if (!data?.claims && request.nextUrl.pathname.startsWith("/servers")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

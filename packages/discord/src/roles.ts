@@ -1,6 +1,7 @@
 import { Routes } from "discord-api-types/v10";
-import type { APIGuildMember, APIRole, APIUser } from "discord-api-types/v10";
-import { getDiscordRest } from "./client";
+import type { APIGuildMember, APIRole } from "discord-api-types/v10";
+import { fetchBotUser, getDiscordRest } from "./client";
+import { cached, DISCORD_CACHE_TTL_MS } from "./cache";
 import { PERMISSION_BITS } from "./permissions";
 
 export interface DiscordRole {
@@ -35,13 +36,18 @@ export async function fetchGuildManageRoles(guildId: string): Promise<DiscordRol
  * roles que estén por debajo del rol más alto del bot.
  */
 export async function fetchAssignableRoles(guildId: string): Promise<AssignableRole[]> {
-  const rest = getDiscordRest();
-  const botUser = (await rest.get(Routes.user())) as APIUser;
-  const [roles, botMember] = (await Promise.all([
-    rest.get(Routes.guildRoles(guildId)),
-    rest.get(Routes.guildMember(guildId, botUser.id)),
-  ])) as [APIRole[], APIGuildMember];
+  return cached(`assignable-roles:${guildId}`, DISCORD_CACHE_TTL_MS, async () => {
+    const rest = getDiscordRest();
+    const botUser = await fetchBotUser();
+    const [roles, botMember] = (await Promise.all([
+      rest.get(Routes.guildRoles(guildId)),
+      rest.get(Routes.guildMember(guildId, botUser.id)),
+    ])) as [APIRole[], APIGuildMember];
+    return toAssignableRoles(guildId, roles, botMember);
+  });
+}
 
+function toAssignableRoles(guildId: string, roles: APIRole[], botMember: APIGuildMember): AssignableRole[] {
   const positions = new Map(roles.map((r) => [r.id, r.position]));
   const botTopPosition = Math.max(0, ...botMember.roles.map((id) => positions.get(id) ?? 0));
 

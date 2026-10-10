@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -26,3 +27,15 @@ export async function createSupabaseServerClient() {
     }
   );
 }
+
+/**
+ * Usuario de la sesión actual, validado contra Supabase Auth. Con `cache` el
+ * layout y la página de un mismo render comparten una sola llamada de red.
+ */
+export const getCurrentUser = cache(async () => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+});

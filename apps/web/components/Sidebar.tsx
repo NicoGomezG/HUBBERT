@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -123,6 +123,19 @@ function navItemClass(active: boolean) {
   }`;
 }
 
+/** Punto que pulsa mientras carga la sección clickeada (debe ir dentro de un Link). */
+function PendingDot() {
+  const { pending } = useLinkStatus();
+  return (
+    <span
+      aria-hidden
+      className={`ml-auto h-1.5 w-1.5 rounded-full bg-accent transition-opacity duration-200 ${
+        pending ? "animate-pulse opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+}
+
 function ActiveBar() {
   return (
     <span
@@ -200,7 +213,7 @@ function SidebarContent({
             {guilds.map((g) => (
               <Link
                 key={g.id}
-                href={`/servers/${g.id}`}
+                href={`/servers/${g.id}/embeds`}
                 onClick={navigate}
                 className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors ${
                   g.id === guildId
@@ -250,6 +263,7 @@ function SidebarContent({
                         className={`h-4 w-4 shrink-0 ${active ? "text-accent" : "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"}`}
                       />
                       {item.label}
+                      <PendingDot />
                     </Link>
                   );
                 })}

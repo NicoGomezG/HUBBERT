@@ -1,6 +1,7 @@
 import { prisma, type Guild } from "@hubbert/db";
 import { hasManageAccess } from "@hubbert/discord";
-import { createSupabaseServerClient } from "./supabase/server";
+import { cache } from "react";
+import { getCurrentUser } from "./supabase/server";
 
 export type GuildAccess =
   | { ok: true; userId: string; discordId: string; guild: Guild; isOwner: boolean }
@@ -15,12 +16,8 @@ export type GuildAccess =
  * Para escrituras sensibles, revalidar contra Discord con el token del
  * bot antes de ejecutar la acción (ver blueprint, sección de seguridad).
  */
-export async function getGuildAccess(guildId: string): Promise<GuildAccess> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export const getGuildAccess = cache(async (guildId: string): Promise<GuildAccess> => {
+  const user = await getCurrentUser();
   if (!user) return { ok: false, reason: "unauthenticated" };
 
   const discordId = String(
@@ -46,4 +43,4 @@ export async function getGuildAccess(guildId: string): Promise<GuildAccess> {
     guild: membership.guild,
     isOwner: membership.isOwner,
   };
-}
+});
