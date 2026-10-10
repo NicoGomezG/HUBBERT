@@ -45,6 +45,7 @@ const SECTIONS = [
       "Ve a la pestaña Roles y haz clic en \"+ Nuevo panel\".",
       "Agrega cada emoji con el rol que entrega (máximo 20) y elige el canal donde publicarlo — se publica al guardar y el bot pone las reacciones.",
       "Modo múltiple: cada miembro puede tener varios roles del panel. Modo único: al reaccionar con otro emoji se le quita el rol anterior.",
+      "Puedes editar un panel publicado (texto, color, imagen, emojis, remitente). Si cambias el remitente o el canal, el panel se republica.",
       "Quitar la reacción quita el rol. El rol de Hubbert tiene que estar por encima de los roles que va a asignar (Configuración del servidor → Roles).",
     ],
   },

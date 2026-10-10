@@ -70,6 +70,7 @@ export {
   getReactionRolePanel,
   listReactionRolePanelMessageIds,
   createReactionRolePanel,
+  updateReactionRolePanel,
   deleteReactionRolePanel,
   handleReactionAdd,
   handleReactionRemove,

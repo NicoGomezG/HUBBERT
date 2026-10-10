@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { EMBED_LIMITS } from "@hubbert/discord";
 
-const optionalUrl = z
+export const optionalUrl = z
   .union([z.literal(""), z.url()])
   .optional()
   .nullable()
@@ -14,6 +14,13 @@ const optionalText = (max: number) =>
     .optional()
     .nullable()
     .transform((v) => (v ? v : null));
+
+// Reglas de Discord para el nombre de un webhook: 1-80 caracteres y sin
+// "discord", "clyde", "everyone" ni "here".
+export const senderNameSchema = optionalText(80).refine(
+  (v) => !v || !/discord|clyde|^(everyone|here)$/i.test(v.trim()),
+  'El nombre no puede contener "discord" ni "clyde", ni ser "everyone" o "here".'
+);
 
 export const embedFieldSchema = z.object({
   name: z.string().trim().min(1, "El nombre del field no puede estar vacío").max(EMBED_LIMITS.fieldName),
@@ -36,12 +43,7 @@ export const embedInputSchema = z.object({
   footerIconUrl: optionalUrl,
   showTimestamp: z.boolean().default(false),
   fields: z.array(embedFieldSchema).max(EMBED_LIMITS.maxFields).default([]),
-  // Reglas de Discord para el nombre de un webhook: 1-80 caracteres y sin
-  // "discord", "clyde", "everyone" ni "here".
-  senderName: optionalText(80).refine(
-    (v) => !v || !/discord|clyde|^(everyone|here)$/i.test(v.trim()),
-    'El nombre no puede contener "discord" ni "clyde", ni ser "everyone" o "here".'
-  ),
+  senderName: senderNameSchema,
   senderAvatarUrl: optionalUrl,
 });
 

@@ -280,20 +280,25 @@ model Ticket {
 
 /// Panel de roles por reacción: un mensaje publicado donde cada emoji da un
 /// rol. Las reacciones las procesa apps/gateway (el webhook de interacciones
-/// no recibe eventos de reacción). Igual que TicketPanel, no hay edición.
+/// no recibe eventos de reacción). Al editarlo se actualiza el mismo mensaje,
+/// salvo que cambie el canal o el remitente: ahí se republica (messageId nuevo).
 model ReactionRolePanel {
-  id          String   @id @default(uuid())
-  guildId     String
-  channelId   String
-  messageId   String   @unique
-  title       String
-  description String?
-  color       Int?
+  id              String   @id @default(uuid())
+  guildId         String
+  channelId       String
+  messageId       String   @unique
+  title           String
+  description     String?
+  color           Int?
+  imageUrl        String?
   /// "multiple": puede tener varios roles del panel a la vez.
   /// "single": al elegir uno se le quitan los demás roles del panel.
-  mode        String   @default("multiple")
-  createdBy   String
-  createdAt   DateTime @default(now())
+  mode            String   @default("multiple")
+  /// Igual que en Embed: si alguno está seteado, se publica por webhook.
+  senderName      String?
+  senderAvatarUrl String?
+  createdBy       String
+  createdAt       DateTime @default(now())
 
   guild   Guild                @relation(fields: [guildId], references: [id], onDelete: Cascade)
   creator User                 @relation(fields: [createdBy], references: [id])

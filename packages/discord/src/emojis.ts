@@ -82,3 +82,12 @@ export async function removeUserReaction(
     Routes.channelMessageUserReaction(channelId, messageId, encodeURIComponent(reactionId), userId)
   );
 }
+
+/** Quita todas las reacciones de un emoji en el mensaje. Requiere Gestionar mensajes. */
+export async function removeAllReactionsForEmoji(
+  channelId: string,
+  messageId: string,
+  reactionId: string
+): Promise<void> {
+  await getDiscordRest().delete(Routes.channelMessageReaction(channelId, messageId, encodeURIComponent(reactionId)));
+}

@@ -1,6 +1,6 @@
 export { getDiscordRest } from "./client";
-export { sendEmbedToChannel, sendMessageToChannel, deleteMessage } from "./messages";
-export { sendEmbedAsWebhook, type WebhookSender } from "./webhooks";
+export { sendEmbedToChannel, sendMessageToChannel, editMessage, deleteMessage } from "./messages";
+export { sendEmbedAsWebhook, sendWebhookMessage, editWebhookMessage, type WebhookSender } from "./webhooks";
 export {
   buildDiscordEmbed,
   validateEmbedInput,
@@ -34,6 +34,7 @@ export {
   fetchGuildEmojis,
   addReaction,
   removeUserReaction,
+  removeAllReactionsForEmoji,
   type ParsedEmoji,
   type DiscordGuildEmoji,
 } from "./emojis";

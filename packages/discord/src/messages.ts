@@ -1,5 +1,10 @@
 import { Routes } from "discord-api-types/v10";
-import type { APIEmbed, APIMessage, RESTPostAPIChannelMessageJSONBody } from "discord-api-types/v10";
+import type {
+  APIEmbed,
+  APIMessage,
+  RESTPatchAPIChannelMessageJSONBody,
+  RESTPostAPIChannelMessageJSONBody,
+} from "discord-api-types/v10";
 import { getDiscordRest } from "./client";
 
 export async function sendEmbedToChannel(
@@ -20,4 +25,12 @@ export async function sendMessageToChannel(
 
 export async function deleteMessage(channelId: string, messageId: string): Promise<void> {
   await getDiscordRest().delete(Routes.channelMessage(channelId, messageId));
+}
+
+export async function editMessage(
+  channelId: string,
+  messageId: string,
+  body: RESTPatchAPIChannelMessageJSONBody
+): Promise<void> {
+  await getDiscordRest().patch(Routes.channelMessage(channelId, messageId), { body });
 }

@@ -80,6 +80,12 @@ export default async function ReactionRolesPage({
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-3">
+                      <Link
+                        href={`/servers/${guildId}/roles/${p.id}`}
+                        className="text-xs font-medium text-zinc-700 hover:underline dark:text-zinc-300"
+                      >
+                        Editar
+                      </Link>
                       <a
                         href={`https://discord.com/channels/${guildId}/${p.channelId}/${p.messageId}`}
                         target="_blank"

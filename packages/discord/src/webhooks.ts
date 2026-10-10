@@ -1,5 +1,12 @@
 import { Routes } from "discord-api-types/v10";
-import type { APIEmbed, APIMessage, APIUser, APIWebhook } from "discord-api-types/v10";
+import type {
+  APIEmbed,
+  APIMessage,
+  APIUser,
+  APIWebhook,
+  RESTPatchAPIWebhookWithTokenMessageJSONBody,
+  RESTPostAPIWebhookWithTokenJSONBody,
+} from "discord-api-types/v10";
 import { getDiscordRest } from "./client";
 
 const WEBHOOK_NAME = "Hubbert";
@@ -31,21 +38,38 @@ async function getOrCreateChannelWebhook(channelId: string): Promise<{ id: strin
   return { id: created.id, token: created.token };
 }
 
-/** Envía un embed con nombre y avatar personalizados (como hacen message.style o Discohook). */
-export async function sendEmbedAsWebhook(
+/** Publica un mensaje con nombre y avatar personalizados (como hacen message.style o Discohook). */
+export async function sendWebhookMessage(
   channelId: string,
-  embed: APIEmbed,
+  body: Omit<RESTPostAPIWebhookWithTokenJSONBody, "username" | "avatar_url">,
   sender: WebhookSender
 ): Promise<APIMessage> {
   const webhook = await getOrCreateChannelWebhook(channelId);
 
   return (await getDiscordRest().post(Routes.webhook(webhook.id, webhook.token), {
-    body: {
-      embeds: [embed],
-      username: sender.username ?? undefined,
-      avatar_url: sender.avatarUrl ?? undefined,
-    },
+    body: { ...body, username: sender.username ?? undefined, avatar_url: sender.avatarUrl ?? undefined },
     query: new URLSearchParams({ wait: "true" }),
     auth: false,
   })) as APIMessage;
+}
+
+/**
+ * Edita un mensaje enviado con `sendWebhookMessage`. Solo funciona si el webhook
+ * del canal sigue siendo el mismo; si lo borraron, Discord responde 10008/10015.
+ */
+export async function editWebhookMessage(
+  channelId: string,
+  messageId: string,
+  body: RESTPatchAPIWebhookWithTokenMessageJSONBody
+): Promise<void> {
+  const webhook = await getOrCreateChannelWebhook(channelId);
+  await getDiscordRest().patch(Routes.webhookMessage(webhook.id, webhook.token, messageId), { body, auth: false });
+}
+
+export async function sendEmbedAsWebhook(
+  channelId: string,
+  embed: APIEmbed,
+  sender: WebhookSender
+): Promise<APIMessage> {
+  return sendWebhookMessage(channelId, { embeds: [embed] }, sender);
 }
