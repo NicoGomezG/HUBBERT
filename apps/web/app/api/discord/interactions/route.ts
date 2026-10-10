@@ -9,6 +9,7 @@ import {
 import {
   CLOSE_TICKET_CUSTOM_ID,
   TicketAlreadyOpenError,
+  TicketMissingRoleError,
   closeTicket,
   formatBirthdayList,
   formatReminderList,
@@ -36,6 +37,7 @@ interface DiscordInteraction {
   member?: {
     nick?: string | null;
     permissions?: string;
+    roles?: string[];
     user?: { id: string; username: string; global_name?: string | null };
   };
 }
@@ -134,20 +136,27 @@ export async function POST(request: Request) {
 
       const guildId = interaction.guild_id;
       const user = interaction.member.user;
-      const displayName = interaction.member.nick ?? user.global_name ?? user.username;
+      const requester = {
+        discordUserId: user.id,
+        displayName: interaction.member.nick ?? user.global_name ?? user.username,
+        roleIds: interaction.member.roles ?? [],
+        hasManageAccess: hasManageAccess(BigInt(interaction.member.permissions ?? "0")),
+      };
       const token = interaction.token;
 
       after(async () => {
         try {
-          const ticket = await openTicket(guildId, panelId, user.id, displayName);
+          const ticket = await openTicket(guildId, panelId, requester);
           await editOriginalInteractionResponse(applicationId, token, {
             content: `🎫 Tu ticket fue creado: <#${ticket.channelId}>`,
           });
         } catch (err) {
           const content =
             err instanceof TicketAlreadyOpenError
-              ? `Ya tienes un ticket abierto: <#${err.channelId}>`
-              : "No se pudo crear el ticket. Prueba de nuevo en un rato.";
+              ? `Ya tienes un ticket abierto en este panel: <#${err.channelId}>`
+              : err instanceof TicketMissingRoleError
+                ? `Para abrir un ticket acá necesitas uno de estos roles: ${err.requiredRoleIds.map((id) => `<@&${id}>`).join(", ")}`
+                : "No se pudo crear el ticket. Prueba de nuevo en un rato.";
           await editOriginalInteractionResponse(applicationId, token, { content }).catch(() => {});
         }
       });
@@ -170,9 +179,10 @@ export async function POST(request: Request) {
 
       const requesterId = member.user.id;
       const requesterHasManageAccess = hasManageAccess(BigInt(member.permissions ?? "0"));
+      const requesterRoleIds = member.roles ?? [];
 
       after(async () => {
-        await closeTicket(channelId, requesterId, requesterHasManageAccess).catch(() => {});
+        await closeTicket(channelId, requesterId, requesterHasManageAccess, requesterRoleIds).catch(() => {});
       });
 
       return NextResponse.json({ type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE });

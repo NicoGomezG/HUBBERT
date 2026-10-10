@@ -33,6 +33,8 @@ const SECTIONS = [
       "Ve a la pestaña Tickets y haz clic en \"+ Nuevo panel\".",
       "Completa título, descripción, texto del botón y el canal donde publicarlo — se publica al guardar.",
       "Cualquier miembro puede hacer clic en el botón del panel para abrir su ticket: se crea un canal privado, visible solo para esa persona y los roles con permiso de administrador.",
+      "Puedes crear todos los paneles que quieras. En cada uno eliges qué roles ven sus tickets (por ejemplo, un panel de @kpop que solo vean los admins y @kpop), qué roles pueden abrirlos y en qué categoría se crean.",
+      "Cada miembro puede tener un ticket abierto por panel.",
       "Desde dentro del canal, el creador del ticket o el staff pueden cerrarlo con el botón \"Cerrar ticket\" (borra el canal). También puedes cerrarlo desde el dashboard.",
       "El dashboard solo muestra metadata del ticket (quién, cuándo, estado) — la conversación en sí queda en Discord.",
     ],

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { fetchAssignableRoles } from "@hubbert/discord";
 import { listPanels, listTickets } from "@hubbert/modules";
 import { closeTicketAction, deletePanelAction } from "./actions";
 
@@ -8,7 +9,14 @@ export default async function TicketsPage({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
-  const [panels, tickets] = await Promise.all([listPanels(guildId), listTickets(guildId)]);
+  const [panels, tickets, roles] = await Promise.all([
+    listPanels(guildId),
+    listTickets(guildId),
+    fetchAssignableRoles(guildId).catch(() => []),
+  ]);
+  const roleName = new Map(roles.map((r) => [r.id, `@${r.name}`]));
+  const roleList = (ids: string[], empty: string) =>
+    ids.length ? ids.map((id) => roleName.get(id) ?? "@rol-borrado").join(", ") : empty;
 
   return (
     <div className="flex flex-col gap-8">
@@ -41,6 +49,8 @@ export default async function TicketsPage({
                 <tr>
                   <th className="px-4 py-2 font-medium">Título</th>
                   <th className="px-4 py-2 font-medium">Botón</th>
+                  <th className="px-4 py-2 font-medium">Ven los tickets</th>
+                  <th className="px-4 py-2 font-medium">Pueden abrir</th>
                   <th className="px-4 py-2 font-medium">Publicado</th>
                   <th className="px-4 py-2 font-medium">Acciones</th>
                 </tr>
@@ -50,6 +60,12 @@ export default async function TicketsPage({
                   <tr key={p.id} className="border-t border-zinc-200 dark:border-zinc-800">
                     <td className="px-4 py-2 text-zinc-900 dark:text-zinc-50">{p.title}</td>
                     <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">{p.buttonLabel}</td>
+                    <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">
+                      {roleList(p.staffRoleIds, "Solo admins")}
+                    </td>
+                    <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">
+                      {roleList(p.requiredRoleIds, "Todos")}
+                    </td>
                     <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">
                       {p.createdAt.toLocaleDateString("es-CL")}
                     </td>

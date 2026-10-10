@@ -9,6 +9,45 @@ interface Channel {
   name: string;
 }
 
+interface Role {
+  id: string;
+  name: string;
+  color: number;
+}
+
+function RoleChecklist({
+  roles,
+  selected,
+  onChange,
+}: {
+  roles: Role[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  function toggle(id: string) {
+    onChange(selected.includes(id) ? selected.filter((r) => r !== id) : [...selected, id]);
+  }
+
+  if (roles.length === 0) {
+    return <p className="text-xs text-zinc-500 dark:text-zinc-400">Cargando roles…</p>;
+  }
+
+  return (
+    <div className="flex max-h-40 flex-col gap-1 overflow-y-auto rounded-md border border-zinc-300 p-2 dark:border-zinc-700">
+      {roles.map((role) => (
+        <label key={role.id} className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
+          <input type="checkbox" checked={selected.includes(role.id)} onChange={() => toggle(role.id)} />
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: role.color ? `#${role.color.toString(16).padStart(6, "0")}` : "#99aab5" }}
+          />
+          @{role.name}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 const BUTTON_STYLES = [
   { value: "primary", label: "Azul" },
   { value: "secondary", label: "Gris" },
@@ -27,16 +66,26 @@ export function PanelForm({ guildId }: { guildId: string }) {
   const [buttonStyle, setButtonStyle] = useState<(typeof BUTTON_STYLES)[number]["value"]>("primary");
   const [welcomeMessage, setWelcomeMessage] = useState(TICKET_WELCOME_DEFAULT);
   const [channelId, setChannelId] = useState("");
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [categories, setCategories] = useState<Channel[]>([]);
+  const [staffRoleIds, setStaffRoleIds] = useState<string[]>([]);
+  const [requiredRoleIds, setRequiredRoleIds] = useState<string[]>([]);
+  const [categoryId, setCategoryId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    fetch(`/api/guilds/${guildId}/channels`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success) setChannels(json.data);
-      })
-      .catch(() => {});
+    const load = <T,>(path: string, set: (data: T) => void) =>
+      fetch(`/api/guilds/${guildId}/${path}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success) set(json.data);
+        })
+        .catch(() => {});
+
+    load<Channel[]>("channels", setChannels);
+    load<Role[]>("roles", setRoles);
+    load<Channel[]>("categories", setCategories);
   }, [guildId]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,6 +105,9 @@ export function PanelForm({ guildId }: { guildId: string }) {
         buttonStyle,
         welcomeMessage: welcomeMessage || null,
         channelId,
+        staffRoleIds,
+        requiredRoleIds,
+        categoryId: categoryId || null,
       }),
     });
     const json = await res.json();
@@ -154,6 +206,35 @@ export function PanelForm({ guildId }: { guildId: string }) {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Quién ve los tickets de este panel</label>
+        <RoleChecklist roles={roles} selected={staffRoleIds} onChange={setStaffRoleIds} />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Siempre los ven quien abrió el ticket y los administradores. Marca roles para sumar a otros (por ejemplo
+          @kpop) — también podrán cerrarlos.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Quién puede abrir tickets (opcional)</label>
+        <RoleChecklist roles={roles} selected={requiredRoleIds} onChange={setRequiredRoleIds} />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Si marcas roles, solo quien tenga al menos uno de ellos puede apretar el botón. Sin marcar: cualquiera.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelClass}>Categoría de los tickets</label>
+        <select className={inputClass} value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          <option value="">La de Configuración del servidor</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="flex flex-col gap-1">

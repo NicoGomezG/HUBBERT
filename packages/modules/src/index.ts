@@ -60,6 +60,9 @@ export {
   TicketNotFoundError,
   TicketForbiddenError,
   TicketAlreadyOpenError,
+  TicketMissingRoleError,
+  TicketPanelValidationError,
+  type TicketRequester,
 } from "./tickets/service";
 export { ticketPanelInputSchema, type TicketPanelInput } from "./tickets/schema";
 export {

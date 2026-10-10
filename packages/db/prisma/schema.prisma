@@ -228,19 +228,27 @@ model ReminderNotification {
 /// Panel publicado en un canal con un botón "Abrir ticket". Una fila = un
 /// mensaje publicado (no hay reenvío/edición, para simplificar el alcance).
 model TicketPanel {
-  id             String   @id @default(uuid())
-  guildId        String
-  channelId      String
-  messageId      String
-  title          String
-  description    String?
-  color          Int?
-  buttonLabel    String   @default("Abrir ticket")
-  buttonEmoji    String   @default("🎫")
-  buttonStyle    String   @default("primary")
-  welcomeMessage String?
-  createdBy      String
-  createdAt      DateTime @default(now())
+  id              String   @id @default(uuid())
+  guildId         String
+  channelId       String
+  messageId       String
+  title           String
+  description     String?
+  color           Int?
+  buttonLabel     String   @default("Abrir ticket")
+  buttonEmoji     String   @default("🎫")
+  buttonStyle     String   @default("primary")
+  welcomeMessage  String?
+  /// Roles que ven y atienden los tickets de este panel, además de los
+  /// roles con Administrador / Administrar servidor (que siempre los ven).
+  staffRoleIds    String[] @default([])
+  /// Si no está vacío, solo quien tenga al menos uno de estos roles puede
+  /// abrir un ticket desde este panel.
+  requiredRoleIds String[] @default([])
+  /// Categoría donde se crean los canales; si es null usa la de GuildSettings.
+  categoryId      String?
+  createdBy       String
+  createdAt       DateTime @default(now())
 
   guild   Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
   creator User     @relation(fields: [createdBy], references: [id])

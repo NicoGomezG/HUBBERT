@@ -6,6 +6,8 @@ import {
   createTicketChannel,
   deleteChannel,
   deleteMessage,
+  fetchAssignableRoles,
+  fetchGuildCategories,
   fetchGuildManageRoles,
   sendMessageToChannel,
 } from "@hubbert/discord";
@@ -16,10 +18,24 @@ import type { TicketPanelInput } from "./schema";
 export class TicketPanelNotFoundError extends Error {}
 export class TicketNotFoundError extends Error {}
 export class TicketForbiddenError extends Error {}
+export class TicketPanelValidationError extends Error {}
 export class TicketAlreadyOpenError extends Error {
   constructor(public channelId: string) {
     super("Ya hay un ticket abierto para este usuario.");
   }
+}
+export class TicketMissingRoleError extends Error {
+  constructor(public requiredRoleIds: string[]) {
+    super("El usuario no tiene ninguno de los roles requeridos por el panel.");
+  }
+}
+
+/** Quién está apretando el botón: viene del `member` de la interacción. */
+export interface TicketRequester {
+  discordUserId: string;
+  displayName: string;
+  roleIds: string[];
+  hasManageAccess: boolean;
 }
 
 const OPEN_TICKET_CUSTOM_ID_PREFIX = "ticket_open:";
@@ -62,6 +78,16 @@ export async function getPanel(guildId: string, panelId: string) {
 }
 
 export async function createPanel(guildId: string, userId: string, input: TicketPanelInput) {
+  // Los ids vienen del cliente: se confirma que sean roles/categorías de esta guild.
+  const [roles, categories] = await Promise.all([fetchAssignableRoles(guildId), fetchGuildCategories(guildId)]);
+  const roleIds = new Set(roles.map((r) => r.id));
+  if ([...input.staffRoleIds, ...input.requiredRoleIds].some((id) => !roleIds.has(id))) {
+    throw new TicketPanelValidationError("Uno de los roles elegidos ya no existe en el servidor.");
+  }
+  if (input.categoryId && !categories.some((c) => c.id === input.categoryId)) {
+    throw new TicketPanelValidationError("La categoría elegida ya no existe en el servidor.");
+  }
+
   const panelId = randomUUID();
   const color = input.color ?? 0x5865f2;
   const embed = buildDiscordEmbed({ title: input.title, description: input.description, color });
@@ -91,6 +117,9 @@ export async function createPanel(guildId: string, userId: string, input: Ticket
       buttonEmoji: input.buttonEmoji,
       buttonStyle: input.buttonStyle,
       welcomeMessage: input.welcomeMessage,
+      staffRoleIds: [...new Set(input.staffRoleIds)],
+      requiredRoleIds: [...new Set(input.requiredRoleIds)],
+      categoryId: input.categoryId,
       createdBy: userId,
     },
   });
@@ -108,24 +137,31 @@ export async function deletePanel(guildId: string, panelId: string) {
   await prisma.ticketPanel.delete({ where: { id: panelId } });
 }
 
-export function findOpenTicketForUser(guildId: string, discordUserId: string) {
-  return prisma.ticket.findFirst({ where: { guildId, discordUserId, status: "open" } });
+/** Un ticket abierto por usuario y por panel: puede tener uno de Soporte y otro de Reportes a la vez. */
+export function findOpenTicketForUser(guildId: string, panelId: string, discordUserId: string) {
+  return prisma.ticket.findFirst({ where: { guildId, panelId, discordUserId, status: "open" } });
 }
 
-export async function openTicket(guildId: string, panelId: string, discordUserId: string, displayName: string) {
-  const existing = await findOpenTicketForUser(guildId, discordUserId);
-  if (existing) throw new TicketAlreadyOpenError(existing.channelId);
-
+export async function openTicket(guildId: string, panelId: string, requester: TicketRequester) {
+  const { discordUserId, displayName } = requester;
   const panel = await getPanel(guildId, panelId); // valida que el panel pertenezca a esta guild
+
+  // Los admins pueden abrir desde cualquier panel aunque no tengan el rol requerido.
+  const hasRequiredRole =
+    panel.requiredRoleIds.length === 0 || panel.requiredRoleIds.some((id) => requester.roleIds.includes(id));
+  if (!hasRequiredRole && !requester.hasManageAccess) throw new TicketMissingRoleError(panel.requiredRoleIds);
+
+  const existing = await findOpenTicketForUser(guildId, panelId, discordUserId);
+  if (existing) throw new TicketAlreadyOpenError(existing.channelId);
 
   const [manageRoles, settings] = await Promise.all([fetchGuildManageRoles(guildId), getGuildSettings(guildId)]);
 
   const channel = await createTicketChannel({
     guildId,
     name: `ticket-${slugify(displayName)}`,
-    parentId: settings.ticketCategoryId,
+    parentId: panel.categoryId ?? settings.ticketCategoryId,
     allowUserId: discordUserId,
-    allowRoleIds: manageRoles.map((r) => r.id),
+    allowRoleIds: [...new Set([...manageRoles.map((r) => r.id), ...panel.staffRoleIds])],
   });
 
   try {
@@ -159,12 +195,22 @@ export async function openTicket(guildId: string, panelId: string, discordUserId
 /**
  * `requesterHasManageAccess` viene precalculado por el caller (desde el
  * bitfield de Discord en la interacción, o desde `getGuildAccess` en el
- * dashboard) para no depender de una llamada extra a la API acá.
+ * dashboard) para no depender de una llamada extra a la API acá. Los roles
+ * de staff del panel también pueden cerrar.
  */
-export async function closeTicket(channelId: string, requesterId: string, requesterHasManageAccess: boolean) {
-  const ticket = await prisma.ticket.findFirst({ where: { channelId, status: "open" } });
+export async function closeTicket(
+  channelId: string,
+  requesterId: string,
+  requesterHasManageAccess: boolean,
+  requesterRoleIds: string[] = []
+) {
+  const ticket = await prisma.ticket.findFirst({
+    where: { channelId, status: "open" },
+    include: { panel: { select: { staffRoleIds: true } } },
+  });
   if (!ticket) throw new TicketNotFoundError();
-  if (ticket.discordUserId !== requesterId && !requesterHasManageAccess) throw new TicketForbiddenError();
+  const isStaff = ticket.panel?.staffRoleIds.some((id) => requesterRoleIds.includes(id)) ?? false;
+  if (ticket.discordUserId !== requesterId && !requesterHasManageAccess && !isStaff) throw new TicketForbiddenError();
 
   await prisma.ticket.update({
     where: { id: ticket.id },

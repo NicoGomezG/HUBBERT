@@ -30,6 +30,13 @@ export const ticketPanelInputSchema = z.object({
     .optional()
     .transform((v) => (v ? v : null)),
   channelId: z.string().min(1, "Elegí un canal"),
+  staffRoleIds: z.array(z.string().min(1)).max(25).default([]),
+  requiredRoleIds: z.array(z.string().min(1)).max(25).default([]),
+  categoryId: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => (v ? v : null)),
 });
 
 export type TicketPanelInput = z.infer<typeof ticketPanelInputSchema>;

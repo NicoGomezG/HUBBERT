@@ -1,4 +1,5 @@
-import { createPanel, listPanels, ticketPanelInputSchema } from "@hubbert/modules";
+import { translateDiscordError } from "@hubbert/discord";
+import { TicketPanelValidationError, createPanel, listPanels, ticketPanelInputSchema } from "@hubbert/modules";
 import { getGuildAccess } from "@/lib/guild-access";
 import { apiError, apiSuccess, guildAccessErrorResponse } from "@/lib/api-response";
 
@@ -26,10 +27,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ gui
     const panel = await createPanel(guildId, access.userId, parsed.data);
     return apiSuccess(panel, 201);
   } catch (err) {
-    return apiError(
-      "DISCORD_ERROR",
-      err instanceof Error ? err.message : "No se pudo publicar el panel en Discord.",
-      502
-    );
+    if (err instanceof TicketPanelValidationError) {
+      return apiError("VALIDATION_ERROR", err.message, 400);
+    }
+    return apiError("DISCORD_ERROR", translateDiscordError(err), 502);
   }
 }
