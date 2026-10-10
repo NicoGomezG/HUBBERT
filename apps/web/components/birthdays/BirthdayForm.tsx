@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BIRTHDAY_MESSAGE_VARIABLES } from "@hubbert/modules";
+import { BIRTHDAY_MESSAGE_VARIABLES } from "@hubbert/modules/client";
 
 interface Member {
   id: string;

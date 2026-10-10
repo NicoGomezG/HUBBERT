@@ -15,7 +15,8 @@ import {
   sendMessageToChannel,
   sendWebhookMessage,
 } from "@hubbert/discord";
-import { REACTION_ROLE_MODES, type ReactionRolePanelInput } from "./schema";
+import { REACTION_ROLE_MODES } from "./constants";
+import type { ReactionRolePanelInput } from "./schema";
 
 type APIEmbed = ReturnType<typeof buildDiscordEmbed>;
 

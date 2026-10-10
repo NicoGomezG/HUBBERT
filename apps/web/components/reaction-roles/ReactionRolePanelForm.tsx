@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { REACTION_ROLE_MAX_OPTIONS, REACTION_ROLE_MODES } from "@hubbert/modules";
+import { REACTION_ROLE_MAX_OPTIONS, REACTION_ROLE_MODES } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
 
 interface Channel {

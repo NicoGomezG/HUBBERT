@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TICKET_MESSAGE_VARIABLES, TICKET_WELCOME_DEFAULT } from "@hubbert/modules";
+import { TICKET_MESSAGE_VARIABLES, TICKET_WELCOME_DEFAULT } from "@hubbert/modules/client";
 
 interface Channel {
   id: string;

@@ -1,27 +1,11 @@
 import { z } from "zod";
 import { parseEmoji } from "@hubbert/discord";
 import { optionalUrl, senderNameSchema } from "../embeds/schema";
+import { REACTION_ROLE_MAX_OPTIONS } from "./constants";
 
-// Límites reales de Discord: title/description de un embed y reacciones
-// distintas por mensaje.
+// Límites reales de Discord para title/description de un embed.
 const EMBED_TITLE_MAX = 256;
 const EMBED_DESCRIPTION_MAX = 4096;
-export const REACTION_ROLE_MAX_OPTIONS = 20;
-
-export const REACTION_ROLE_MODES = [
-  {
-    value: "multiple",
-    label: "Múltiple",
-    description: "Cada miembro puede tener varios roles del panel.",
-    footer: "Reacciona para obtener un rol · quita tu reacción para sacártelo",
-  },
-  {
-    value: "single",
-    label: "Único",
-    description: "Al elegir un rol se le quitan los demás del panel.",
-    footer: "Solo puedes tener uno de estos roles a la vez",
-  },
-] as const;
 
 const optionSchema = z.object({
   emoji: z.string().transform((value, ctx) => {

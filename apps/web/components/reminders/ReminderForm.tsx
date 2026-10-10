@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { REMINDER_MESSAGE_VARIABLES } from "@hubbert/modules";
+import { REMINDER_MESSAGE_VARIABLES } from "@hubbert/modules/client";
 
 interface Channel {
   id: string;
