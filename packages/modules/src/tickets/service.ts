@@ -6,10 +6,13 @@ import {
   createTicketChannel,
   deleteChannel,
   deleteMessage,
+  editMessage,
+  editWebhookMessage,
   fetchAssignableRoles,
   fetchGuildCategories,
   fetchGuildManageRoles,
   sendMessageToChannel,
+  sendWebhookMessage,
 } from "@hubbert/discord";
 import { getGuildSettings } from "../settings/service";
 import { TICKET_WELCOME_DEFAULT, renderTicketWelcomeMessage } from "./message";
@@ -77,8 +80,8 @@ export async function getPanel(guildId: string, panelId: string) {
   return panel;
 }
 
-export async function createPanel(guildId: string, userId: string, input: TicketPanelInput) {
-  // Los ids vienen del cliente: se confirma que sean roles/categorías de esta guild.
+// Los ids vienen del cliente: se confirma que sean roles/categorías de esta guild.
+async function assertPanelReferences(guildId: string, input: TicketPanelInput) {
   const [roles, categories] = await Promise.all([fetchAssignableRoles(guildId), fetchGuildCategories(guildId)]);
   const roleIds = new Set(roles.map((r) => r.id));
   if ([...input.staffRoleIds, ...input.requiredRoleIds].some((id) => !roleIds.has(id))) {
@@ -87,13 +90,17 @@ export async function createPanel(guildId: string, userId: string, input: Ticket
   if (input.categoryId && !categories.some((c) => c.id === input.categoryId)) {
     throw new TicketPanelValidationError("La categoría elegida ya no existe en el servidor.");
   }
+}
 
-  const panelId = randomUUID();
-  const color = input.color ?? 0x5865f2;
-  const embed = buildDiscordEmbed({ title: input.title, description: input.description, color });
+function usesWebhook(sender: { senderName: string | null; senderAvatarUrl: string | null }) {
+  return Boolean(sender.senderName || sender.senderAvatarUrl);
+}
 
-  const message = await sendMessageToChannel(input.channelId, {
-    embeds: [embed],
+function panelMessageBody(panelId: string, input: TicketPanelInput) {
+  return {
+    embeds: [
+      buildDiscordEmbed({ title: input.title, description: input.description, color: input.color ?? 0x5865f2 }),
+    ],
     components: [
       buildButtonRow({
         customId: `${OPEN_TICKET_CUSTOM_ID_PREFIX}${panelId}`,
@@ -102,27 +109,92 @@ export async function createPanel(guildId: string, userId: string, input: Ticket
         emoji: input.buttonEmoji,
       }),
     ],
-  });
+  };
+}
 
-  return prisma.ticketPanel.create({
-    data: {
-      id: panelId,
-      guildId,
-      channelId: input.channelId,
-      messageId: message.id,
-      title: input.title,
-      description: input.description,
-      color,
-      buttonLabel: input.buttonLabel,
-      buttonEmoji: input.buttonEmoji,
-      buttonStyle: input.buttonStyle,
-      welcomeMessage: input.welcomeMessage,
-      staffRoleIds: [...new Set(input.staffRoleIds)],
-      requiredRoleIds: [...new Set(input.requiredRoleIds)],
-      categoryId: input.categoryId,
-      createdBy: userId,
-    },
-  });
+/**
+ * Publica como el bot o por webhook. El webhook lo crea el bot, así que es
+ * "propiedad de la aplicación" y Discord le permite llevar botones que
+ * disparan interacciones.
+ */
+async function publishPanelMessage(panelId: string, input: TicketPanelInput): Promise<string> {
+  const body = panelMessageBody(panelId, input);
+  const message = usesWebhook(input)
+    ? await sendWebhookMessage(input.channelId, body, { username: input.senderName, avatarUrl: input.senderAvatarUrl })
+    : await sendMessageToChannel(input.channelId, body);
+  return message.id;
+}
+
+function panelData(input: TicketPanelInput) {
+  return {
+    channelId: input.channelId,
+    title: input.title,
+    description: input.description,
+    color: input.color ?? 0x5865f2,
+    buttonLabel: input.buttonLabel,
+    buttonEmoji: input.buttonEmoji,
+    buttonStyle: input.buttonStyle,
+    welcomeMessage: input.welcomeMessage,
+    staffRoleIds: [...new Set(input.staffRoleIds)],
+    requiredRoleIds: [...new Set(input.requiredRoleIds)],
+    categoryId: input.categoryId,
+    senderName: input.senderName,
+    senderAvatarUrl: input.senderAvatarUrl,
+  };
+}
+
+export async function createPanel(guildId: string, userId: string, input: TicketPanelInput) {
+  await assertPanelReferences(guildId, input);
+
+  const panelId = randomUUID();
+  const messageId = await publishPanelMessage(panelId, input);
+
+  try {
+    return await prisma.ticketPanel.create({
+      data: { ...panelData(input), id: panelId, guildId, messageId, createdBy: userId },
+    });
+  } catch (err) {
+    await deleteMessage(input.channelId, messageId).catch(() => {});
+    throw err;
+  }
+}
+
+/**
+ * Discord no deja cambiar el nombre/avatar de un mensaje ya enviado, así que si
+ * cambia el remitente o el canal se republica el panel (messageId nuevo). Si no,
+ * se edita el mismo mensaje. El botón conserva el mismo custom_id (el id del
+ * panel), y los tickets ya abiertos no se tocan: los cambios de roles o
+ * categoría aplican a los tickets nuevos.
+ */
+export async function updatePanel(guildId: string, panelId: string, input: TicketPanelInput) {
+  const existing = await getPanel(guildId, panelId);
+  await assertPanelReferences(guildId, input);
+
+  const mustRepublish =
+    existing.channelId !== input.channelId ||
+    existing.senderName !== input.senderName ||
+    existing.senderAvatarUrl !== input.senderAvatarUrl;
+
+  let messageId = existing.messageId;
+  let editedInPlace = false;
+
+  if (!mustRepublish) {
+    const body = panelMessageBody(panelId, input);
+    try {
+      if (usesWebhook(existing)) await editWebhookMessage(existing.channelId, existing.messageId, body);
+      else await editMessage(existing.channelId, existing.messageId, body);
+      editedInPlace = true;
+    } catch {
+      // El mensaje o el webhook fueron borrados a mano en Discord: se republica.
+    }
+  }
+
+  if (!editedInPlace) {
+    messageId = await publishPanelMessage(panelId, input);
+    await deleteMessage(existing.channelId, existing.messageId).catch(() => {});
+  }
+
+  return prisma.ticketPanel.update({ where: { id: panelId }, data: { ...panelData(input), messageId } });
 }
 
 export async function deletePanel(guildId: string, panelId: string) {
@@ -178,12 +250,22 @@ export async function openTicket(guildId: string, panelId: string, requester: Ti
       description: welcomeText,
       color: panel.color ?? 0x5865f2,
     });
-    await sendMessageToChannel(channel.id, {
+    const welcomeBody = {
       embeds: [embed],
       components: [
         buildButtonRow({ customId: CLOSE_TICKET_CUSTOM_ID, label: "Cerrar ticket", style: "danger", emoji: "🔒" }),
       ],
-    });
+    };
+    // Con remitente personalizado se crea un webhook en el canal del ticket;
+    // se borra solo junto con el canal al cerrar el ticket.
+    if (usesWebhook(panel)) {
+      await sendWebhookMessage(channel.id, welcomeBody, {
+        username: panel.senderName,
+        avatarUrl: panel.senderAvatarUrl,
+      });
+    } else {
+      await sendMessageToChannel(channel.id, welcomeBody);
+    }
 
     return ticket;
   } catch (err) {

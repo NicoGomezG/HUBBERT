@@ -50,6 +50,7 @@ export {
   listTickets,
   getPanel,
   createPanel,
+  updatePanel,
   deletePanel,
   findOpenTicketForUser,
   openTicket,
@@ -95,4 +96,4 @@ export {
 } from "./welcome/service";
 export { welcomeSettingsInputSchema, welcomeTestSchema, type WelcomeSettingsInput } from "./welcome/schema";
 export { buildWelcomeCardUrl, parseWelcomeCardUrl, type WelcomeCardParams } from "./welcome/card";
-export { renderCardText } from "./welcome/message";
+export { renderCardText, findCardFont, CARD_FONTS } from "./welcome/message";

@@ -70,11 +70,19 @@ export default async function TicketsPage({
                       {p.createdAt.toLocaleDateString("es-CL")}
                     </td>
                     <td className="px-4 py-2">
-                      <form action={deletePanelAction.bind(null, guildId, p.id)}>
-                        <button type="submit" className="text-xs text-red-600 hover:underline dark:text-red-400">
-                          Eliminar
-                        </button>
-                      </form>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/servers/${guildId}/tickets/${p.id}`}
+                          className="text-xs font-medium text-zinc-700 hover:underline dark:text-zinc-300"
+                        >
+                          Editar
+                        </Link>
+                        <form action={deletePanelAction.bind(null, guildId, p.id)}>
+                          <button type="submit" className="text-xs text-red-600 hover:underline dark:text-red-400">
+                            Eliminar
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { optionalUrl, senderNameSchema } from "../embeds/schema";
 
 // Límites reales de Discord para title/description de un embed.
 const EMBED_TITLE_MAX = 256;
@@ -37,6 +38,8 @@ export const ticketPanelInputSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v ? v : null)),
+  senderName: senderNameSchema,
+  senderAvatarUrl: optionalUrl,
 });
 
 export type TicketPanelInput = z.infer<typeof ticketPanelInputSchema>;

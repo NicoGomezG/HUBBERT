@@ -227,7 +227,8 @@ model ReminderNotification {
 }
 
 /// Panel publicado en un canal con un botón "Abrir ticket". Una fila = un
-/// mensaje publicado (no hay reenvío/edición, para simplificar el alcance).
+/// mensaje publicado. Al editarlo se actualiza el mismo mensaje, salvo que
+/// cambie el canal o el remitente: ahí se republica (messageId nuevo).
 model TicketPanel {
   id              String   @id @default(uuid())
   guildId         String
@@ -248,6 +249,11 @@ model TicketPanel {
   requiredRoleIds String[] @default([])
   /// Categoría donde se crean los canales; si es null usa la de GuildSettings.
   categoryId      String?
+  /// Igual que en Embed: si alguno está seteado, el panel y el mensaje dentro
+  /// de cada ticket se publican por webhook (creado por el bot, para que los
+  /// botones sigan funcionando).
+  senderName      String?
+  senderAvatarUrl String?
   createdBy       String
   createdAt       DateTime @default(now())
 
@@ -352,6 +358,8 @@ model WelcomeSettings {
   cardTitle         String   @default("¡Bienvenido/a!")
   cardSubtitle      String   @default("{nombre} · Miembro #{miembros}")
   cardTextColor     Int      @default(16777215)
+  /// Clave de CARD_FONTS (modules/welcome/message.ts), no el nombre de la fuente.
+  cardFont          String   @default("default")
   /// La despedida se manda por DM a quien sale; Discord la rechaza si ya no
   /// comparte ningún servidor con el bot, y en ese caso se descarta.
   goodbyeEnabled    Boolean  @default(false)

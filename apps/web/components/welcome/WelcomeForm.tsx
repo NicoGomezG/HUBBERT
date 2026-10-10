@@ -6,6 +6,7 @@ import {
   HUBBERT_PROMO_BUTTONS,
   HUBBERT_PROMO_FIELDS,
   WELCOME_MESSAGE_VARIABLES,
+  CARD_FONTS,
   CARD_TEXT_VARIABLES,
   renderWelcomeMessage,
 } from "@hubbert/modules/client";
@@ -30,6 +31,7 @@ export interface WelcomeFormInitial {
   cardTitle: string;
   cardSubtitle: string;
   cardTextColor: number;
+  cardFont: string;
   senderName: string | null;
   senderAvatarUrl: string | null;
   goodbyeEnabled: boolean;
@@ -86,6 +88,7 @@ export function WelcomeForm({
     cardTitle: initial.cardTitle,
     cardSubtitle: initial.cardSubtitle,
     cardTextColor: `#${initial.cardTextColor.toString(16).padStart(6, "0")}`,
+    cardFont: initial.cardFont,
     senderName: initial.senderName ?? "",
     senderAvatarUrl: initial.senderAvatarUrl ?? "",
     goodbyeEnabled: initial.goodbyeEnabled,
@@ -114,6 +117,7 @@ export function WelcomeForm({
     subtitle: form.cardSubtitle,
     accent: form.welcomeColor.replace("#", ""),
     text: form.cardTextColor.replace("#", ""),
+    font: form.cardFont,
   }).toString();
   const [cardPreviewUrl, setCardPreviewUrl] = useState("");
   useEffect(() => {
@@ -367,6 +371,20 @@ export function WelcomeForm({
                       onChange={(e) => set("cardTextColor", e.target.value)}
                     />
                   </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass}>Fuente del texto</label>
+                  <select
+                    className={inputClass}
+                    value={form.cardFont}
+                    onChange={(e) => set("cardFont", e.target.value)}
+                  >
+                    {CARD_FONTS.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <VariableList variables={CARD_TEXT_VARIABLES} />
               </>

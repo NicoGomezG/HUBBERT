@@ -34,6 +34,7 @@ export async function GET(request: Request) {
       subtitle: renderCardText(settings.cardSubtitle, textData),
       accentColor: settings.welcomeColor ?? 0x5865f2,
       textColor: settings.cardTextColor,
+      font: settings.cardFont,
     },
     // La URL incluye la versión de la configuración, así que la imagen nunca cambia para una misma URL.
     { "Cache-Control": "public, max-age=31536000, immutable" }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { optionalUrl, senderNameSchema } from "../embeds/schema";
+import { CARD_FONTS, type CardFontValue } from "./message";
 
 const optionalText = (max: number) =>
   z
@@ -35,6 +36,9 @@ export const welcomeSettingsInputSchema = z
     cardTitle: z.string().trim().max(60, "El título de la tarjeta admite hasta 60 caracteres").default(""),
     cardSubtitle: z.string().trim().max(80, "El subtítulo de la tarjeta admite hasta 80 caracteres").default(""),
     cardTextColor: z.number().int().min(0).max(0xffffff).default(0xffffff),
+    cardFont: z
+      .enum(CARD_FONTS.map((f) => f.value) as [CardFontValue, ...CardFontValue[]])
+      .default("default"),
     senderName: senderNameSchema,
     senderAvatarUrl: optionalUrl,
     goodbyeEnabled: z.boolean(),

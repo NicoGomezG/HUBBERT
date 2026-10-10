@@ -32,5 +32,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ guil
     subtitle: renderCardText((query.get("subtitle") ?? "").slice(0, 80), textData),
     accentColor: colorParam(query.get("accent"), 0x5865f2),
     textColor: colorParam(query.get("text"), 0xffffff),
+    font: query.get("font") ?? "default",
   });
 }

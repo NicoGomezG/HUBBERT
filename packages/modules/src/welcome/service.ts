@@ -55,6 +55,7 @@ export async function getWelcomeSettings(guildId: string) {
       cardTitle: CARD_TITLE_DEFAULT,
       cardSubtitle: CARD_SUBTITLE_DEFAULT,
       cardTextColor: 0xffffff,
+      cardFont: "default",
       senderName: null,
       senderAvatarUrl: null,
       goodbyeEnabled: false,

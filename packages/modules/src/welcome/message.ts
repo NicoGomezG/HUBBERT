@@ -96,3 +96,38 @@ export function renderCardText(
     .replaceAll("{servidor}", data.guildName)
     .replaceAll("{miembros}", data.memberCount != null ? String(data.memberCount) : "?");
 }
+
+/**
+ * Fuentes de Google Fonts para la tarjeta. `family` es el nombre exacto en
+ * Google Fonts; los pesos son los que se piden para título y subtítulo (las
+ * que tienen un solo peso usan 400 en ambos). `scale` achica el texto de las
+ * fuentes muy anchas para que un título largo no se salga de la tarjeta.
+ */
+export const CARD_FONTS = [
+  { value: "default", label: "Predeterminada", family: null, titleWeight: 700, subtitleWeight: 400 },
+  { value: "poppins", label: "Poppins", family: "Poppins", titleWeight: 700, subtitleWeight: 400 },
+  { value: "montserrat", label: "Montserrat", family: "Montserrat", titleWeight: 800, subtitleWeight: 500 },
+  { value: "bebas", label: "Bebas Neue", family: "Bebas Neue", titleWeight: 400, subtitleWeight: 400 },
+  { value: "anton", label: "Anton", family: "Anton", titleWeight: 400, subtitleWeight: 400 },
+  { value: "righteous", label: "Righteous", family: "Righteous", titleWeight: 400, subtitleWeight: 400 },
+  { value: "bangers", label: "Bangers (cómic)", family: "Bangers", titleWeight: 400, subtitleWeight: 400 },
+  { value: "orbitron", label: "Orbitron (futurista)", family: "Orbitron", titleWeight: 800, subtitleWeight: 500 },
+  {
+    value: "press-start",
+    label: "Press Start 2P (pixel)",
+    family: "Press Start 2P",
+    titleWeight: 400,
+    subtitleWeight: 400,
+    scale: 0.6,
+  },
+  { value: "pacifico", label: "Pacifico (manuscrita)", family: "Pacifico", titleWeight: 400, subtitleWeight: 400 },
+  { value: "lobster", label: "Lobster", family: "Lobster", titleWeight: 400, subtitleWeight: 400 },
+  { value: "dancing", label: "Dancing Script", family: "Dancing Script", titleWeight: 700, subtitleWeight: 500 },
+  { value: "permanent-marker", label: "Permanent Marker (plumón)", family: "Permanent Marker", titleWeight: 400, subtitleWeight: 400 },
+] as const;
+
+export type CardFontValue = (typeof CARD_FONTS)[number]["value"];
+
+export function findCardFont(value: string | null | undefined) {
+  return CARD_FONTS.find((f) => f.value === value) ?? CARD_FONTS[0];
+}
