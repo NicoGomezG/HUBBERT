@@ -2,6 +2,7 @@ import { prisma } from "@hubbert/db";
 import {
   buildDiscordEmbed,
   fetchGuildTextChannels,
+  sendEmbedAsWebhook,
   sendEmbedToChannel,
   validateEmbedInput,
   type DiscordTextChannel,
@@ -51,6 +52,8 @@ export async function createEmbed(guildId: string, userId: string, input: EmbedI
       footerText: input.footerText,
       footerIconUrl: input.footerIconUrl,
       showTimestamp: input.showTimestamp,
+      senderName: input.senderName,
+      senderAvatarUrl: input.senderAvatarUrl,
       fields: {
         create: input.fields.map((f, i) => ({ ...f, position: i })),
       },
@@ -84,6 +87,8 @@ export async function updateEmbed(
         footerText: input.footerText,
         footerIconUrl: input.footerIconUrl,
         showTimestamp: input.showTimestamp,
+        senderName: input.senderName,
+        senderAvatarUrl: input.senderAvatarUrl,
         fields: {
           create: input.fields.map((f, i) => ({ ...f, position: i })),
         },
@@ -131,7 +136,14 @@ export async function sendEmbed(guildId: string, embedId: string, channelId: str
     throw new EmbedValidationError(["El canal no pertenece a este servidor."]);
   }
 
-  const message = await sendEmbedToChannel(channelId, buildDiscordEmbed(input));
+  const discordEmbed = buildDiscordEmbed(input);
+  const message =
+    embed.senderName || embed.senderAvatarUrl
+      ? await sendEmbedAsWebhook(channelId, discordEmbed, {
+          username: embed.senderName,
+          avatarUrl: embed.senderAvatarUrl,
+        })
+      : await sendEmbedToChannel(channelId, discordEmbed);
 
   await prisma.embed.update({
     where: { id: embedId },

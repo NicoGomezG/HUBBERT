@@ -1,5 +1,6 @@
 export { getDiscordRest } from "./client";
 export { sendEmbedToChannel, sendMessageToChannel, deleteMessage } from "./messages";
+export { sendEmbedAsWebhook, type WebhookSender } from "./webhooks";
 export {
   buildDiscordEmbed,
   validateEmbedInput,
@@ -19,7 +20,23 @@ export {
   type CreateTicketChannelInput,
 } from "./channels";
 export { fetchGuildMembers, type DiscordGuildMember } from "./members";
-export { fetchGuildManageRoles, type DiscordRole } from "./roles";
+export {
+  fetchGuildManageRoles,
+  fetchAssignableRoles,
+  addMemberRole,
+  removeMemberRole,
+  type DiscordRole,
+  type AssignableRole,
+} from "./roles";
+export {
+  parseEmoji,
+  parseGatewayEmoji,
+  fetchGuildEmojis,
+  addReaction,
+  removeUserReaction,
+  type ParsedEmoji,
+  type DiscordGuildEmoji,
+} from "./emojis";
 export { translateDiscordError } from "./errors";
 export { hasManageAccess, PERMISSION_BITS } from "./permissions";
 export { verifyDiscordRequest, editOriginalInteractionResponse } from "./interactions";

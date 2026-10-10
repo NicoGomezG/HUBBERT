@@ -3,7 +3,10 @@ import { prisma } from "@hubbert/db";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { refreshBotPresence } from "./actions";
 
-const BOT_INVITE_PERMISSIONS = "84992"; // View Channels, Send Messages, Embed Links, Read Message History
+// View Channels, Send Messages, Embed Links, Read Message History, Add Reactions,
+// Manage Messages, Manage Roles (roles por reacción) y Manage Webhooks (remitente
+// personalizado en embeds).
+const BOT_INVITE_PERMISSIONS = "805399616";
 
 function botInviteUrl(guildId: string): string {
   const params = new URLSearchParams({

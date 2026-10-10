@@ -18,11 +18,12 @@ model User {
   createdAt   DateTime @default(now())
   lastLoginAt DateTime @default(now())
 
-  memberships  GuildMember[]
-  embeds       Embed[]
-  birthdays    Birthday[]
-  reminders    Reminder[]
-  ticketPanels TicketPanel[]
+  memberships        GuildMember[]
+  embeds             Embed[]
+  birthdays          Birthday[]
+  reminders          Reminder[]
+  ticketPanels       TicketPanel[]
+  reactionRolePanels ReactionRolePanel[]
 
   @@map("users")
 }
@@ -38,13 +39,14 @@ model Guild {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  members      GuildMember[]
-  settings     GuildSettings?
-  embeds       Embed[]
-  birthdays    Birthday[]
-  reminders    Reminder[]
-  ticketPanels TicketPanel[]
-  tickets      Ticket[]
+  members            GuildMember[]
+  settings           GuildSettings?
+  embeds             Embed[]
+  birthdays          Birthday[]
+  reminders          Reminder[]
+  ticketPanels       TicketPanel[]
+  tickets            Ticket[]
+  reactionRolePanels ReactionRolePanel[]
 
   @@map("guilds")
 }
@@ -84,25 +86,29 @@ model GuildSettings {
 
 /// Embed guardado y reutilizable de un servidor.
 model Embed {
-  id            String    @id @default(uuid())
-  guildId       String
-  name          String
-  title         String?
-  description   String?
-  url           String?
-  color         Int?
-  authorName    String?
-  authorUrl     String?
-  authorIconUrl String?
-  imageUrl      String?
-  thumbnailUrl  String?
-  footerText    String?
-  footerIconUrl String?
-  showTimestamp Boolean   @default(false)
-  createdBy     String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastSentAt    DateTime?
+  id              String    @id @default(uuid())
+  guildId         String
+  name            String
+  title           String?
+  description     String?
+  url             String?
+  color           Int?
+  authorName      String?
+  authorUrl       String?
+  authorIconUrl   String?
+  imageUrl        String?
+  thumbnailUrl    String?
+  footerText      String?
+  footerIconUrl   String?
+  showTimestamp   Boolean   @default(false)
+  /// Nombre y avatar con los que aparece el mensaje. Si alguno está seteado,
+  /// el embed se envía por un webhook del canal en vez de como el bot.
+  senderName      String?
+  senderAvatarUrl String?
+  createdBy       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastSentAt      DateTime?
 
   guild  Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
   author User         @relation(fields: [createdBy], references: [id])
@@ -193,8 +199,8 @@ model Reminder {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  guild         Guild                 @relation(fields: [guildId], references: [id], onDelete: Cascade)
-  creator       User                  @relation(fields: [createdBy], references: [id])
+  guild         Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  creator       User                   @relation(fields: [createdBy], references: [id])
   notifications ReminderNotification[]
 
   @@index([guildId, targetDate])
@@ -262,4 +268,47 @@ model Ticket {
 
   @@index([guildId, status])
   @@map("tickets")
+}
+
+/// Panel de roles por reacción: un mensaje publicado donde cada emoji da un
+/// rol. Las reacciones las procesa apps/gateway (el webhook de interacciones
+/// no recibe eventos de reacción). Igual que TicketPanel, no hay edición.
+model ReactionRolePanel {
+  id          String   @id @default(uuid())
+  guildId     String
+  channelId   String
+  messageId   String   @unique
+  title       String
+  description String?
+  color       Int?
+  /// "multiple": puede tener varios roles del panel a la vez.
+  /// "single": al elegir uno se le quitan los demás roles del panel.
+  mode        String   @default("multiple")
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  guild   Guild                @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  creator User                 @relation(fields: [createdBy], references: [id])
+  options ReactionRoleOption[]
+
+  @@index([guildId])
+  @@map("reaction_role_panels")
+}
+
+model ReactionRoleOption {
+  id       String  @id @default(uuid())
+  panelId  String
+  /// Tal como se muestra en Discord: "🎮" o "<:nombre:123>".
+  emoji    String
+  /// Clave de comparación contra el evento del gateway: el emoji unicode
+  /// sin variation selectors, o el id si es un emoji custom.
+  emojiKey String
+  roleId   String
+  label    String?
+  position Int
+
+  panel ReactionRolePanel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  @@unique([panelId, emojiKey])
+  @@map("reaction_role_options")
 }

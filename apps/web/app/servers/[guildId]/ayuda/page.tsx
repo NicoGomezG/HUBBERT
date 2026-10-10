@@ -4,6 +4,7 @@ const SECTIONS = [
     steps: [
       "Ve a la pestaña Embeds y haz clic en \"+ Nuevo embed\".",
       "Completa título, descripción, color y los fields que quieras.",
+      "Opcional: en \"Remitente\" puedes cambiar el nombre y el avatar con que aparece el mensaje (el bot necesita el permiso Gestionar webhooks).",
       "Guarda el embed y elige a qué canal enviarlo.",
       "Puedes reenviarlo cuando quieras: queda guardado para reutilizarlo.",
     ],
@@ -34,6 +35,15 @@ const SECTIONS = [
       "Cualquier miembro puede hacer clic en el botón del panel para abrir su ticket: se crea un canal privado, visible solo para esa persona y los roles con permiso de administrador.",
       "Desde dentro del canal, el creador del ticket o el staff pueden cerrarlo con el botón \"Cerrar ticket\" (borra el canal). También puedes cerrarlo desde el dashboard.",
       "El dashboard solo muestra metadata del ticket (quién, cuándo, estado) — la conversación en sí queda en Discord.",
+    ],
+  },
+  {
+    title: "Roles por reacción",
+    steps: [
+      "Ve a la pestaña Roles y haz clic en \"+ Nuevo panel\".",
+      "Agrega cada emoji con el rol que entrega (máximo 20) y elige el canal donde publicarlo — se publica al guardar y el bot pone las reacciones.",
+      "Modo múltiple: cada miembro puede tener varios roles del panel. Modo único: al reaccionar con otro emoji se le quita el rol anterior.",
+      "Quitar la reacción quita el rol. El rol de Hubbert tiene que estar por encima de los roles que va a asignar (Configuración del servidor → Roles).",
     ],
   },
   {

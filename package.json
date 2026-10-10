@@ -8,6 +8,8 @@
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
     "lint": "pnpm --filter web lint",
+    "gateway": "pnpm --filter gateway start",
+    "gateway:dev": "pnpm --filter gateway dev",
     "db:generate": "pnpm --filter @hubbert/db generate",
     "db:push": "pnpm --filter @hubbert/db push",
     "db:migrate": "pnpm --filter @hubbert/db migrate",

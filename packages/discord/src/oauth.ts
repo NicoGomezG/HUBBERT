@@ -18,7 +18,7 @@ export async function fetchUserGuilds(accessToken: string): Promise<DiscordOAuth
     throw new Error(`Discord API error ${res.status} al listar guilds del usuario`);
   }
 
-  return res.json();
+  return (await res.json()) as DiscordOAuthGuild[];
 }
 
 export function guildIconUrl(guildId: string, icon: string | null): string | null {

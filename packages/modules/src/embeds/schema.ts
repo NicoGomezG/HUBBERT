@@ -36,6 +36,13 @@ export const embedInputSchema = z.object({
   footerIconUrl: optionalUrl,
   showTimestamp: z.boolean().default(false),
   fields: z.array(embedFieldSchema).max(EMBED_LIMITS.maxFields).default([]),
+  // Reglas de Discord para el nombre de un webhook: 1-80 caracteres y sin
+  // "discord", "clyde", "everyone" ni "here".
+  senderName: optionalText(80).refine(
+    (v) => !v || !/discord|clyde|^(everyone|here)$/i.test(v.trim()),
+    'El nombre no puede contener "discord" ni "clyde", ni ser "everyone" o "here".'
+  ),
+  senderAvatarUrl: optionalUrl,
 });
 
 export type EmbedInputPayload = z.infer<typeof embedInputSchema>;

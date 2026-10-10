@@ -8,6 +8,7 @@ const TABS = [
   { slug: "birthdays", label: "Cumpleaños" },
   { slug: "reminders", label: "Recordatorios" },
   { slug: "tickets", label: "Tickets" },
+  { slug: "roles", label: "Roles" },
   { slug: "settings", label: "Configuración" },
   { slug: "donaciones", label: "Donaciones" },
   { slug: "ayuda", label: "Ayuda" },

@@ -63,6 +63,24 @@ export {
 } from "./tickets/service";
 export { ticketPanelInputSchema, type TicketPanelInput } from "./tickets/schema";
 export {
+  listReactionRolePanels,
+  getReactionRolePanel,
+  listReactionRolePanelMessageIds,
+  createReactionRolePanel,
+  deleteReactionRolePanel,
+  handleReactionAdd,
+  handleReactionRemove,
+  ReactionRolePanelNotFoundError,
+  ReactionRoleValidationError,
+  type ReactionEvent,
+} from "./reaction-roles/service";
+export {
+  reactionRolePanelInputSchema,
+  REACTION_ROLE_MODES,
+  REACTION_ROLE_MAX_OPTIONS,
+  type ReactionRolePanelInput,
+} from "./reaction-roles/schema";
+export {
   TICKET_WELCOME_DEFAULT,
   TICKET_MESSAGE_VARIABLES,
   renderTicketWelcomeMessage,

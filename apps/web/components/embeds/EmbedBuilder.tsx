@@ -26,6 +26,8 @@ export interface EmbedBuilderInitial {
   footerText: string | null;
   footerIconUrl: string | null;
   showTimestamp: boolean;
+  senderName: string | null;
+  senderAvatarUrl: string | null;
   fields: { name: string; value: string; inline: boolean }[];
 }
 
@@ -55,6 +57,8 @@ function emptyState(initial?: EmbedBuilderInitial) {
     footerText: initial?.footerText ?? "",
     footerIconUrl: initial?.footerIconUrl ?? "",
     showTimestamp: initial?.showTimestamp ?? false,
+    senderName: initial?.senderName ?? "",
+    senderAvatarUrl: initial?.senderAvatarUrl ?? "",
     fields: (initial?.fields ?? []).map((f) => ({ ...f, key: newKey() })) as FieldValue[],
   };
 }
@@ -97,6 +101,8 @@ export function EmbedBuilder({
       footerText: form.footerText,
       footerIconUrl: form.footerIconUrl,
       showTimestamp: form.showTimestamp,
+      senderName: form.senderName || null,
+      senderAvatarUrl: form.senderAvatarUrl || null,
       fields: form.fields,
     }),
     [form]
@@ -142,6 +148,8 @@ export function EmbedBuilder({
       footerText: form.footerText || null,
       footerIconUrl: form.footerIconUrl || null,
       showTimestamp: form.showTimestamp,
+      senderName: form.senderName || null,
+      senderAvatarUrl: form.senderAvatarUrl || null,
       fields: form.fields.map(({ name, value, inline }) => ({ name, value, inline })),
     };
 
@@ -204,6 +212,35 @@ export function EmbedBuilder({
             onChange={(e) => set("name", e.target.value)}
             placeholder="ej. Anuncio de evento"
           />
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+          <p className={labelClass}>Remitente (opcional)</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className={labelClass}>Nombre</label>
+              <input
+                className={inputClass}
+                value={form.senderName}
+                maxLength={80}
+                placeholder="Hubbert"
+                onChange={(e) => set("senderName", e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass}>Avatar (URL)</label>
+              <input
+                className={inputClass}
+                value={form.senderAvatarUrl}
+                placeholder="https://…/logo.png"
+                onChange={(e) => set("senderAvatarUrl", e.target.value)}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Cambia el nombre y la foto con que aparece el mensaje. Se envía mediante un webhook del canal, así que el
+            bot necesita el permiso Gestionar webhooks. Déjalo vacío para enviarlo como Hubbert.
+          </p>
         </div>
 
         <div className="flex flex-col gap-1">

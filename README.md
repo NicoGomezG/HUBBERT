@@ -9,9 +9,27 @@ Arquitectura completa: ver el blueprint de diseño (documento aparte).
 ## Estructura
 
 ```
-apps/web/       Dashboard + API (Next.js App Router) — único deployable
+apps/web/       Dashboard + API (Next.js App Router) — se deploya en Vercel
+apps/gateway/   Worker siempre encendido conectado al Gateway de Discord (roles por reacción)
 packages/db/    Schema de Prisma + cliente compartido (@hubbert/db)
 ```
+
+### Gateway (roles por reacción)
+
+El webhook de interacciones de `apps/web` no recibe eventos de reacción, así
+que los paneles de roles necesitan `apps/gateway` corriendo 24/7 fuera de
+Vercel (Railway, Fly.io, un VPS…). Solo usa el intent
+`GUILD_MESSAGE_REACTIONS` (no es privilegiado).
+
+```bash
+cp apps/gateway/.env.example apps/gateway/.env   # DATABASE_URL, DIRECT_URL, DISCORD_BOT_TOKEN
+pnpm gateway:dev                                 # local, con watch
+pnpm gateway                                     # producción (el host inyecta las env vars)
+```
+
+En el servidor de Discord el bot necesita **Gestionar roles**, **Añadir
+reacciones** y **Gestionar mensajes** (para limpiar reacciones en modo único),
+y su rol tiene que estar por encima de los roles que asigna.
 
 ## Requisitos
 

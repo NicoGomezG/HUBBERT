@@ -8,6 +8,9 @@ const KNOWN_ERROR_TIPS: Record<number, string> = {
   50013:
     "Al bot le falta un permiso para hacer esto. Revisa sus permisos en Configuración de roles del servidor.",
   10003: "Ese canal ya no existe o fue eliminado.",
+  30007: "El canal llegó al máximo de 15 webhooks. Borra alguno en Editar canal → Integraciones → Webhooks.",
+  10011: "Ese rol ya no existe en el servidor.",
+  10014: "Discord no reconoce uno de los emojis. Usa un emoji estándar o uno custom de este servidor.",
   50035: "Discord rechazó el contenido del mensaje (probablemente supera algún límite de tamaño).",
 };
 
