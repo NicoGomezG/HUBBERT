@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "buildCommand": "pnpm --filter @hubbert/db generate",
+    "watchPatterns": ["apps/gateway/**", "packages/**", "pnpm-lock.yaml", "railway.json"]
+  },
+  "deploy": {
+    "startCommand": "pnpm gateway",
+    "restartPolicyType": "ALWAYS"
+  }
+}
