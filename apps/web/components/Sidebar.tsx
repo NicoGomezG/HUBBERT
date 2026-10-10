@@ -71,7 +71,7 @@ function Icon({ name, className = "h-4 w-4" }: { name: IconName; className?: str
   );
 }
 
-const SECTIONS: { label: string; items: { slug: string; label: string; icon: IconName }[] }[] = [
+const SECTIONS: { label: string; items: { slug: string; label: string; icon: IconName; highlight?: boolean }[] }[] = [
   {
     label: "Mensajes",
     items: [
@@ -92,7 +92,7 @@ const SECTIONS: { label: string; items: { slug: string; label: string; icon: Ico
     label: "Servidor",
     items: [
       { slug: "settings", label: "Configuración", icon: "settings" },
-      { slug: "donaciones", label: "Donaciones", icon: "donaciones" },
+      { slug: "donaciones", label: "Donaciones", icon: "donaciones", highlight: true },
       { slug: "ayuda", label: "Ayuda", icon: "ayuda" },
     ],
   },
@@ -115,7 +115,13 @@ function GuildAvatar({ guild, size = "h-8 w-8" }: { guild: SidebarGuild | null; 
   );
 }
 
-function navItemClass(active: boolean) {
+function navItemClass(active: boolean, highlight = false) {
+  if (highlight) {
+    // Donaciones se destaca siempre para invitar a apoyar el proyecto.
+    return `group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-400/10 dark:hover:text-rose-300 ${
+      active ? "bg-rose-500/10 dark:bg-rose-400/10" : ""
+    }`;
+  }
   return `group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
     active
       ? "bg-zinc-900/[0.06] font-medium text-zinc-900 dark:bg-white/[0.06] dark:text-zinc-50"
@@ -255,12 +261,12 @@ function SidebarContent({
                       href={href}
                       onClick={navigate}
                       aria-current={active ? "page" : undefined}
-                      className={navItemClass(active)}
+                      className={navItemClass(active, item.highlight)}
                     >
                       {active && <ActiveBar />}
                       <Icon
                         name={item.icon}
-                        className={`h-4 w-4 shrink-0 ${active ? "text-accent" : "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"}`}
+                        className={`h-4 w-4 shrink-0 ${item.highlight ? "fill-current transition-transform duration-200 group-hover:scale-125" : active ? "text-accent" : "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"}`}
                       />
                       {item.label}
                       <PendingDot />
