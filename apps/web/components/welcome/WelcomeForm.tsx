@@ -211,7 +211,7 @@ export function WelcomeForm({
   const inputClass =
     "w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#5865F2] focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50";
   const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400";
-  const sectionClass = "grid grid-cols-1 gap-8 lg:grid-cols-2";
+  const sectionClass = "grid grid-cols-1 gap-8 xl:grid-cols-2";
   const toggleClass = "flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-50";
   const testButtonClass =
     "w-fit rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900";
@@ -254,7 +254,7 @@ export function WelcomeForm({
 
           <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
             <p className={labelClass}>Remitente (opcional)</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <input
                 className={inputClass}
                 value={form.senderName}
@@ -292,7 +292,7 @@ export function WelcomeForm({
             <VariableList variables={WELCOME_MESSAGE_VARIABLES} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
               <label className={labelClass}>Color</label>
               <input
@@ -343,7 +343,7 @@ export function WelcomeForm({
                     Tamaño ideal: 1024 × 450. Si la imagen no carga o es WebP/GIF, se usa el degradado.
                   </p>
                 </div>
-                <div className="grid grid-cols-[1fr_1fr_5rem] gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_5rem]">
                   <div className="flex flex-col gap-1">
                     <label className={labelClass}>Título</label>
                     <input
@@ -416,7 +416,7 @@ export function WelcomeForm({
           </button>
         </div>
 
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="xl:sticky xl:top-6 xl:self-start">
           <p className={`${labelClass} mb-2`}>Vista previa</p>
           <EmbedPreview data={welcomePreview} />
         </div>
@@ -468,7 +468,7 @@ export function WelcomeForm({
           </button>
         </div>
 
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="xl:sticky xl:top-6 xl:self-start">
           <p className={`${labelClass} mb-2`}>Vista previa (mensaje privado)</p>
           <EmbedPreview data={goodbyePreview} />
           <div className="mt-2 flex flex-wrap gap-2">

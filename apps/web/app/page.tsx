@@ -32,8 +32,9 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-16 bg-zinc-50 px-8 py-20 dark:bg-black">
-      <div className="flex w-full max-w-md flex-col items-center gap-4 text-center">
+    <main className="relative flex min-h-screen flex-col items-center gap-16 bg-zinc-50 px-4 py-16 sm:px-8 sm:py-20 dark:bg-black">
+      <div aria-hidden className="app-backdrop" />
+      <div className="relative flex w-full max-w-md flex-col items-center gap-4 text-center">
         <Image src="/logo.png" alt="Hubbert" width={72} height={72} priority />
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           Hubbert
@@ -50,11 +51,11 @@ export default async function Home() {
         </Link>
       </div>
 
-      <div className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="relative grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
         {FEATURES.map((feature) => (
           <div
             key={feature.title}
-            className="flex flex-col gap-1.5 rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+            className="flex flex-col gap-1.5 rounded-xl border border-zinc-200 bg-white/70 p-5 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/60"
           >
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
               {feature.title}

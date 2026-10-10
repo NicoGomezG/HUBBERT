@@ -21,7 +21,7 @@ export default async function TicketsPage({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Paneles</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">

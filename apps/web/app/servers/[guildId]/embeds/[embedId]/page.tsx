@@ -20,7 +20,7 @@ export default async function EditEmbedPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
           Editar embed
         </h2>

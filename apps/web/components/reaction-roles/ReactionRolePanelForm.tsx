@@ -179,11 +179,11 @@ export function ReactionRolePanelForm({
   const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400";
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
           <p className={labelClass}>Remitente (opcional)</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
               <label className={labelClass}>Nombre</label>
               <input
@@ -228,7 +228,7 @@ export function ReactionRolePanelForm({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
             <label className={labelClass}>Color del panel</label>
             <input
@@ -392,7 +392,7 @@ export function ReactionRolePanelForm({
         </button>
       </form>
 
-      <div className="lg:sticky lg:top-6 lg:self-start">
+      <div className="xl:sticky xl:top-6 xl:self-start">
         <p className={`${labelClass} mb-2`}>Vista previa</p>
         <EmbedPreview data={previewData} />
       </div>
