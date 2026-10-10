@@ -11,6 +11,8 @@ import {
   type DiscordUserInfo,
 } from "@hubbert/discord";
 import {
+  CARD_SUBTITLE_DEFAULT,
+  CARD_TITLE_DEFAULT,
   GOODBYE_MESSAGE_DEFAULT,
   HUBBERT_PROMO_BUTTONS,
   HUBBERT_PROMO_FIELDS,
@@ -18,6 +20,7 @@ import {
   WELCOME_TITLE_DEFAULT,
   renderWelcomeMessage,
 } from "./message";
+import { buildWelcomeCardUrl } from "./card";
 import type { WelcomeSettingsInput } from "./schema";
 
 export class WelcomeValidationError extends Error {}
@@ -47,6 +50,11 @@ export async function getWelcomeSettings(guildId: string) {
       welcomeImageUrl: null,
       showAvatar: true,
       pingMember: true,
+      cardEnabled: false,
+      cardBackgroundUrl: null,
+      cardTitle: CARD_TITLE_DEFAULT,
+      cardSubtitle: CARD_SUBTITLE_DEFAULT,
+      cardTextColor: 0xffffff,
       senderName: null,
       senderAvatarUrl: null,
       goodbyeEnabled: false,
@@ -87,12 +95,24 @@ export async function sendWelcome(guildId: string, member: WelcomeMember, { forc
     memberCount: guild.memberCount,
   });
 
+  // Con la tarjeta activa, el avatar ya va dentro de la imagen: no se repite como thumbnail.
+  const cardUrl = settings.cardEnabled
+    ? buildWelcomeCardUrl({
+        guildId,
+        userId: member.id,
+        avatar: member.avatar ?? "",
+        displayName: displayNameOf(member),
+        memberCount: guild.memberCount != null ? String(guild.memberCount) : "",
+        version: String(settings.updatedAt.getTime()),
+      })
+    : null;
+
   const embed = buildDiscordEmbed({
     title: settings.welcomeTitle,
     description,
     color: settings.welcomeColor ?? HUBBERT_COLOR,
-    thumbnailUrl: settings.showAvatar ? userAvatarUrl(member) : null,
-    imageUrl: settings.welcomeImageUrl,
+    thumbnailUrl: settings.showAvatar && !cardUrl ? userAvatarUrl(member) : null,
+    imageUrl: cardUrl ?? settings.welcomeImageUrl,
   });
 
   // Las menciones dentro de un embed no notifican: para que le llegue el ping

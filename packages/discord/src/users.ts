@@ -9,10 +9,13 @@ export interface DiscordUserInfo {
   avatar?: string | null;
 }
 
-/** Avatar del usuario, o el avatar por defecto de Discord si no tiene uno. */
-export function userAvatarUrl(user: DiscordUserInfo): string {
+/**
+ * Avatar del usuario, o el avatar por defecto de Discord si no tiene uno.
+ * `staticImage` fuerza PNG aunque el avatar sea animado (para generar imágenes).
+ */
+export function userAvatarUrl(user: DiscordUserInfo, { staticImage = false } = {}): string {
   if (user.avatar) {
-    const ext = user.avatar.startsWith("a_") ? "gif" : "png";
+    const ext = user.avatar.startsWith("a_") && !staticImage ? "gif" : "png";
     return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=256`;
   }
   const index = Number((BigInt(user.id) >> BigInt(22)) % BigInt(6));

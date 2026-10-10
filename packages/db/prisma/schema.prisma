@@ -331,25 +331,33 @@ model ReactionRoleOption {
 /// entrada/salida los procesa apps/gateway (requiere el intent privilegiado
 /// Server Members en el Developer Portal).
 model WelcomeSettings {
-  guildId          String   @id
-  welcomeEnabled   Boolean  @default(false)
-  welcomeChannelId String?
-  welcomeTitle     String?
-  welcomeMessage   String
-  welcomeColor     Int?
-  welcomeImageUrl  String?
+  guildId           String   @id
+  welcomeEnabled    Boolean  @default(false)
+  welcomeChannelId  String?
+  welcomeTitle      String?
+  welcomeMessage    String
+  welcomeColor      Int?
+  welcomeImageUrl   String?
   /// Muestra el avatar del miembro como thumbnail del embed.
-  showAvatar       Boolean  @default(true)
+  showAvatar        Boolean  @default(true)
   /// Menciona al miembro fuera del embed para que le llegue la notificación.
-  pingMember       Boolean  @default(true)
-  senderName       String?
-  senderAvatarUrl  String?
+  pingMember        Boolean  @default(true)
+  senderName        String?
+  senderAvatarUrl   String?
+  /// Tarjeta estilo Koya: imagen generada por apps/web (/api/cards/welcome)
+  /// con el fondo, el avatar del miembro y los textos encima. Si está activa
+  /// reemplaza a welcomeImageUrl y al thumbnail del avatar.
+  cardEnabled       Boolean  @default(false)
+  cardBackgroundUrl String?
+  cardTitle         String   @default("¡Bienvenido/a!")
+  cardSubtitle      String   @default("{nombre} · Miembro #{miembros}")
+  cardTextColor     Int      @default(16777215)
   /// La despedida se manda por DM a quien sale; Discord la rechaza si ya no
   /// comparte ningún servidor con el bot, y en ese caso se descarta.
-  goodbyeEnabled   Boolean  @default(false)
-  goodbyeMessage   String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  goodbyeEnabled    Boolean  @default(false)
+  goodbyeMessage    String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
 

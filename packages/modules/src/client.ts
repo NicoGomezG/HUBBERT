@@ -14,4 +14,8 @@ export {
   HUBBERT_PROMO_FIELDS,
   HUBBERT_PROMO_BUTTONS,
   renderWelcomeMessage,
+  CARD_TITLE_DEFAULT,
+  CARD_SUBTITLE_DEFAULT,
+  CARD_TEXT_VARIABLES,
+  renderCardText,
 } from "./welcome/message";

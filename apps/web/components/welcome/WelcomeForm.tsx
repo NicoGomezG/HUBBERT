@@ -6,6 +6,7 @@ import {
   HUBBERT_PROMO_BUTTONS,
   HUBBERT_PROMO_FIELDS,
   WELCOME_MESSAGE_VARIABLES,
+  CARD_TEXT_VARIABLES,
   renderWelcomeMessage,
 } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
@@ -24,6 +25,11 @@ export interface WelcomeFormInitial {
   welcomeImageUrl: string | null;
   showAvatar: boolean;
   pingMember: boolean;
+  cardEnabled: boolean;
+  cardBackgroundUrl: string | null;
+  cardTitle: string;
+  cardSubtitle: string;
+  cardTextColor: number;
   senderName: string | null;
   senderAvatarUrl: string | null;
   goodbyeEnabled: boolean;
@@ -75,6 +81,11 @@ export function WelcomeForm({
     welcomeImageUrl: initial.welcomeImageUrl ?? "",
     showAvatar: initial.showAvatar,
     pingMember: initial.pingMember,
+    cardEnabled: initial.cardEnabled,
+    cardBackgroundUrl: initial.cardBackgroundUrl ?? "",
+    cardTitle: initial.cardTitle,
+    cardSubtitle: initial.cardSubtitle,
+    cardTextColor: `#${initial.cardTextColor.toString(16).padStart(6, "0")}`,
     senderName: initial.senderName ?? "",
     senderAvatarUrl: initial.senderAvatarUrl ?? "",
     goodbyeEnabled: initial.goodbyeEnabled,
@@ -96,18 +107,36 @@ export function WelcomeForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  // La tarjeta se genera en el servidor: se espera a que deje de escribir para no pedir una imagen por tecla.
+  const cardQuery = new URLSearchParams({
+    bg: form.cardBackgroundUrl,
+    title: form.cardTitle,
+    subtitle: form.cardSubtitle,
+    accent: form.welcomeColor.replace("#", ""),
+    text: form.cardTextColor.replace("#", ""),
+  }).toString();
+  const [cardPreviewUrl, setCardPreviewUrl] = useState("");
+  useEffect(() => {
+    if (!form.cardEnabled) return;
+    const timeout = setTimeout(
+      () => setCardPreviewUrl(`/api/guilds/${guildId}/welcome/card-preview?${cardQuery}`),
+      600
+    );
+    return () => clearTimeout(timeout);
+  }, [guildId, cardQuery, form.cardEnabled]);
+
   const welcomePreview = useMemo(
     () => ({
       title: form.welcomeTitle,
       description: previewText(form.welcomeMessage, guildName),
       color: parseInt(form.welcomeColor.replace("#", ""), 16),
-      thumbnailUrl: form.showAvatar ? SAMPLE_AVATAR : null,
-      imageUrl: form.welcomeImageUrl,
+      thumbnailUrl: form.showAvatar && !form.cardEnabled ? SAMPLE_AVATAR : null,
+      imageUrl: form.cardEnabled ? cardPreviewUrl : form.welcomeImageUrl,
       senderName: form.senderName,
       senderAvatarUrl: form.senderAvatarUrl,
       fields: [],
     }),
-    [form, guildName]
+    [form, guildName, cardPreviewUrl]
   );
 
   const goodbyePreview = useMemo(
@@ -131,6 +160,8 @@ export function WelcomeForm({
         welcomeTitle: form.welcomeTitle || null,
         welcomeColor: parseInt(form.welcomeColor.replace("#", ""), 16),
         welcomeImageUrl: form.welcomeImageUrl || null,
+        cardBackgroundUrl: form.cardBackgroundUrl || null,
+        cardTextColor: parseInt(form.cardTextColor.replace("#", ""), 16),
         senderName: form.senderName || null,
         senderAvatarUrl: form.senderAvatarUrl || null,
       }),
@@ -267,21 +298,91 @@ export function WelcomeForm({
                 onChange={(e) => set("welcomeColor", e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className={labelClass}>Imagen debajo (URL, opcional)</label>
-              <input
-                className={inputClass}
-                value={form.welcomeImageUrl}
-                placeholder="https://…/banner.png"
-                onChange={(e) => set("welcomeImageUrl", e.target.value)}
-              />
-            </div>
+            {!form.cardEnabled && (
+              <div className="flex flex-col gap-1">
+                <label className={labelClass}>Imagen debajo (URL, opcional)</label>
+                <input
+                  className={inputClass}
+                  value={form.welcomeImageUrl}
+                  placeholder="https://…/banner.png"
+                  onChange={(e) => set("welcomeImageUrl", e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-            <input type="checkbox" checked={form.showAvatar} onChange={(e) => set("showAvatar", e.target.checked)} />
-            Mostrar el avatar del nuevo miembro
-          </label>
+          <div className="flex flex-col gap-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+            <label className={toggleClass}>
+              <input
+                type="checkbox"
+                checked={form.cardEnabled}
+                onChange={(e) => set("cardEnabled", e.target.checked)}
+              />
+              Tarjeta con imagen (estilo Koya)
+            </label>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Genera una imagen con tu fondo, el avatar del nuevo miembro en un círculo y los textos encima. El aro del
+              avatar usa el color de arriba.
+            </p>
+
+            {form.cardEnabled && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass}>Fondo (URL de imagen PNG o JPG)</label>
+                  <input
+                    className={inputClass}
+                    value={form.cardBackgroundUrl}
+                    placeholder="https://…/fondo.png — vacío: degradado con el color"
+                    onChange={(e) => set("cardBackgroundUrl", e.target.value)}
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Tamaño ideal: 1024 × 450. Si la imagen no carga o es WebP/GIF, se usa el degradado.
+                  </p>
+                </div>
+                <div className="grid grid-cols-[1fr_1fr_5rem] gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Título</label>
+                    <input
+                      className={inputClass}
+                      value={form.cardTitle}
+                      maxLength={60}
+                      onChange={(e) => set("cardTitle", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Subtítulo</label>
+                    <input
+                      className={inputClass}
+                      value={form.cardSubtitle}
+                      maxLength={80}
+                      onChange={(e) => set("cardSubtitle", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Texto</label>
+                    <input
+                      type="color"
+                      className="h-9 w-full rounded-md border border-zinc-300 dark:border-zinc-700"
+                      value={form.cardTextColor}
+                      onChange={(e) => set("cardTextColor", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <VariableList variables={CARD_TEXT_VARIABLES} />
+              </>
+            )}
+          </div>
+
+          {!form.cardEnabled && (
+            <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+              <input
+                type="checkbox"
+                checked={form.showAvatar}
+                onChange={(e) => set("showAvatar", e.target.checked)}
+              />
+              Mostrar el avatar del nuevo miembro
+            </label>
+          )}
           <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
             <input type="checkbox" checked={form.pingMember} onChange={(e) => set("pingMember", e.target.checked)} />
             Mencionarlo para que le llegue la notificación

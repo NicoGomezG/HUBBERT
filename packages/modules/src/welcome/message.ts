@@ -76,3 +76,23 @@ export const HUBBERT_PROMO_BUTTONS = [
   { label: "Donar", url: HUBBERT_LINKS.donations, emoji: "💜" },
   { label: "Discord del creador", url: HUBBERT_LINKS.creatorDiscord, emoji: "🛠️" },
 ];
+
+export const CARD_TITLE_DEFAULT = "¡Bienvenido/a!";
+export const CARD_SUBTITLE_DEFAULT = "{nombre} · Miembro #{miembros}";
+
+// La tarjeta es una imagen: no hay menciones, así que {usuario} no aplica.
+export const CARD_TEXT_VARIABLES = [
+  { token: "{nombre}", description: "Nombre visible del nuevo miembro" },
+  { token: "{servidor}", description: "Nombre del servidor" },
+  { token: "{miembros}", description: "Cantidad de miembros" },
+] as const;
+
+export function renderCardText(
+  template: string,
+  data: { displayName: string; guildName: string; memberCount: number | null }
+): string {
+  return template
+    .replaceAll("{nombre}", data.displayName)
+    .replaceAll("{servidor}", data.guildName)
+    .replaceAll("{miembros}", data.memberCount != null ? String(data.memberCount) : "?");
+}
