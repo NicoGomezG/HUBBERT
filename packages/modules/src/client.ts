@@ -5,3 +5,13 @@ export { TICKET_WELCOME_DEFAULT, TICKET_MESSAGE_VARIABLES } from "./tickets/mess
 export { BIRTHDAY_MESSAGE_VARIABLES } from "./birthdays/message";
 export { REMINDER_MESSAGE_VARIABLES } from "./reminders/message";
 export { REACTION_ROLE_MODES, REACTION_ROLE_MAX_OPTIONS } from "./reaction-roles/constants";
+export {
+  WELCOME_TITLE_DEFAULT,
+  WELCOME_MESSAGE_DEFAULT,
+  GOODBYE_MESSAGE_DEFAULT,
+  WELCOME_MESSAGE_VARIABLES,
+  GOODBYE_MESSAGE_VARIABLES,
+  HUBBERT_PROMO_FIELDS,
+  HUBBERT_PROMO_BUTTONS,
+  renderWelcomeMessage,
+} from "./welcome/message";

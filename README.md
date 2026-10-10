@@ -10,16 +10,20 @@ Arquitectura completa: ver el blueprint de diseño (documento aparte).
 
 ```
 apps/web/       Dashboard + API (Next.js App Router) — se deploya en Vercel
-apps/gateway/   Worker siempre encendido conectado al Gateway de Discord (roles por reacción)
+apps/gateway/   Worker siempre encendido conectado al Gateway de Discord (roles por reacción, bienvenidas)
 packages/db/    Schema de Prisma + cliente compartido (@hubbert/db)
 ```
 
-### Gateway (roles por reacción)
+### Gateway (roles por reacción y bienvenidas)
 
-El webhook de interacciones de `apps/web` no recibe eventos de reacción, así
-que los paneles de roles necesitan `apps/gateway` corriendo 24/7 fuera de
-Vercel (Railway, Fly.io, un VPS…). Solo usa el intent
-`GUILD_MESSAGE_REACTIONS` (no es privilegiado).
+El webhook de interacciones de `apps/web` no recibe eventos de reacción ni de
+miembros, así que los roles por reacción y las bienvenidas necesitan
+`apps/gateway` corriendo 24/7 fuera de Vercel (Railway, Fly.io, un VPS…). Usa
+los intents
+`GUILD_MESSAGE_REACTIONS` (roles por reacción) y `GUILD_MEMBERS` (bienvenidas y
+despedidas). **`GUILD_MEMBERS` es privilegiado**: actívalo en Developer Portal →
+Bot → Privileged Gateway Intents → *Server Members Intent*, o Discord rechaza la
+conexión (código 4014).
 
 ```bash
 cp apps/gateway/.env.example apps/gateway/.env   # DATABASE_URL, DIRECT_URL, DISCORD_BOT_TOKEN

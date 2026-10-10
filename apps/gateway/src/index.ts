@@ -6,13 +6,16 @@ import {
   handleReactionAdd,
   handleReactionRemove,
   listReactionRolePanelMessageIds,
+  sendGoodbye,
+  sendWelcome,
+  type WelcomeMember,
   type ReactionEvent,
 } from "@hubbert/modules";
 
 /**
- * Proceso siempre encendido conectado al Gateway de Discord. Existe solo
- * porque las reacciones no llegan por el webhook de interacciones que usa
- * apps/web: todo lo demás del bot sigue siendo serverless.
+ * Proceso siempre encendido conectado al Gateway de Discord. Existe porque
+ * las reacciones y las entradas/salidas de miembros no llegan por el webhook
+ * de interacciones que usa apps/web: todo lo demás sigue siendo serverless.
  */
 
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -35,7 +38,9 @@ async function refreshPanelMessageIds() {
 const rest = getDiscordRest();
 const gateway = new WebSocketManager({
   token,
-  intents: GatewayIntentBits.GuildMessageReactions,
+  // GuildMembers es privilegiado: hay que activar "Server Members Intent" en el
+  // Developer Portal o Discord cierra la conexión con el código 4014.
+  intents: GatewayIntentBits.GuildMessageReactions | GatewayIntentBits.GuildMembers,
   rest,
 });
 const client = new Client({ rest, gateway });
@@ -89,6 +94,38 @@ client.on(GatewayDispatchEvents.MessageReactionAdd, ({ data }) => {
 client.on(GatewayDispatchEvents.MessageReactionRemove, ({ data }) => {
   const event = toReactionEvent(data);
   if (event) void run("reaction remove", event, handleReactionRemove);
+});
+
+interface RawMemberUser {
+  id: string;
+  username: string;
+  global_name?: string | null;
+  avatar?: string | null;
+  bot?: boolean;
+}
+
+function toWelcomeMember(user: RawMemberUser, nick?: string | null): WelcomeMember | null {
+  if (user.bot) return null;
+  return { id: user.id, username: user.username, globalName: user.global_name, avatar: user.avatar, nick };
+}
+
+client.on(GatewayDispatchEvents.GuildMemberAdd, ({ data }) => {
+  const member = data.user && toWelcomeMember(data.user, data.nick);
+  if (!member) return;
+  sendWelcome(data.guild_id, member).catch((err) =>
+    console.error(`[gateway] bienvenida falló (guild ${data.guild_id}):`, translateDiscordError(err))
+  );
+});
+
+client.on(GatewayDispatchEvents.GuildMemberRemove, ({ data }) => {
+  const member = toWelcomeMember(data.user);
+  if (!member) return;
+  sendGoodbye(data.guild_id, member).catch((err) => {
+    // 50007: DMs cerrados o ya no comparte servidores con el bot — es lo esperado, no se loguea.
+    if ((err as { code?: number }).code !== 50007) {
+      console.error(`[gateway] despedida falló (guild ${data.guild_id}):`, translateDiscordError(err));
+    }
+  });
 });
 
 async function shutdown() {

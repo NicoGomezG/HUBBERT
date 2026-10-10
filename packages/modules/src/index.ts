@@ -85,3 +85,12 @@ export {
   TICKET_MESSAGE_VARIABLES,
   renderTicketWelcomeMessage,
 } from "./tickets/message";
+export {
+  getWelcomeSettings,
+  updateWelcomeSettings,
+  sendWelcome,
+  sendGoodbye,
+  WelcomeValidationError,
+  type WelcomeMember,
+} from "./welcome/service";
+export { welcomeSettingsInputSchema, welcomeTestSchema, type WelcomeSettingsInput } from "./welcome/schema";

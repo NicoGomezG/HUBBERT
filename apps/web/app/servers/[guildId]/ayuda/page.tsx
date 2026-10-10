@@ -50,6 +50,15 @@ const SECTIONS = [
     ],
   },
   {
+    title: "Bienvenida y despedida",
+    steps: [
+      "Ve a la pestaña Bienvenida, activa la bienvenida y elige el canal donde se publica.",
+      "Personaliza título, mensaje, color, imagen y remitente. Puedes usar {usuario}, {nombre}, {servidor} y {miembros}.",
+      "La despedida se manda por mensaje privado a quien sale, con tu mensaje y la información de Hubbert. Solo le llega si todavía comparte algún servidor con el bot.",
+      "Usa \"Probar bienvenida\" y \"Probar despedida\" para ver cómo queda: se envían como si fueras tú quien entra o sale.",
+    ],
+  },
+  {
     title: "Configuración",
     steps: [
       "Ve a la pestaña Configuración para definir la zona horaria del servidor.",

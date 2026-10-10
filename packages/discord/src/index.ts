@@ -8,7 +8,13 @@ export {
   type EmbedInput,
   type EmbedFieldInput,
 } from "./embeds";
-export { buildButtonRow, type ButtonRowInput, type ButtonRowStyle } from "./components";
+export {
+  buildButtonRow,
+  buildLinkButtonRow,
+  type ButtonRowInput,
+  type ButtonRowStyle,
+  type LinkButtonInput,
+} from "./components";
 export { fetchUserGuilds, guildIconUrl, type DiscordOAuthGuild } from "./oauth";
 export { fetchBotGuildIds } from "./guilds";
 export {
@@ -38,6 +44,13 @@ export {
   type ParsedEmoji,
   type DiscordGuildEmoji,
 } from "./emojis";
+export {
+  userAvatarUrl,
+  fetchUser,
+  fetchGuildSummary,
+  sendDirectMessage,
+  type DiscordUserInfo,
+} from "./users";
 export { translateDiscordError } from "./errors";
 export { hasManageAccess, PERMISSION_BITS } from "./permissions";
 export { verifyDiscordRequest, editOriginalInteractionResponse } from "./interactions";
