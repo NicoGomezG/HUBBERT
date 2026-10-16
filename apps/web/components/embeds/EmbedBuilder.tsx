@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmbedPreview } from "./EmbedPreview";
+import { SaveBar, SettingRow, SettingsCard, SubTabs, Toggle, inputClass, labelClass } from "@/components/ui/settings";
 
 interface FieldValue {
   key: string;
@@ -72,7 +73,10 @@ export function EmbedBuilder({
 }) {
   const router = useRouter();
   const [embedId, setEmbedId] = useState<string | null>(initial?.id ?? null);
-  const [form, setForm] = useState(() => emptyState(initial));
+  const [tab, setTab] = useState<"contenido" | "fields" | "imagenes">("contenido");
+  const [saved, setSaved] = useState(() => emptyState(initial));
+  const [form, setForm] = useState(saved);
+  const dirty = !embedId || JSON.stringify(form) !== JSON.stringify(saved);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [channelId, setChannelId] = useState("");
   const [saving, setSaving] = useState(false);
@@ -110,6 +114,7 @@ export function EmbedBuilder({
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setMessage(null);
   }
 
   function addField() {
@@ -134,6 +139,7 @@ export function EmbedBuilder({
     setSaving(true);
     setMessage(null);
 
+    const snapshot = form;
     const payload = {
       name: form.name,
       title: form.title || null,
@@ -170,6 +176,7 @@ export function EmbedBuilder({
       return;
     }
 
+    setSaved(snapshot);
     setMessage({ kind: "ok", text: "Embed guardado." });
     if (!embedId) {
       setEmbedId(json.data.id);
@@ -197,246 +204,231 @@ export function EmbedBuilder({
     );
   }
 
-  const inputClass =
-    "w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#5865F2] focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50";
-  const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400";
+  function field(id: keyof typeof form, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) {
+    return (
+      <div className="flex flex-col gap-1">
+        <label className={labelClass} htmlFor={`embed-${id}`}>
+          {label}
+        </label>
+        <input
+          id={`embed-${id}`}
+          className={inputClass}
+          value={form[id] as string}
+          onChange={(e) => set(id, e.target.value as never)}
+          {...props}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label className={labelClass}>Nombre interno</label>
-          <input
-            className={inputClass}
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
-            placeholder="ej. Anuncio de evento"
-          />
-        </div>
+    <div className="flex flex-col gap-5">
+      <SubTabs
+        tabs={[
+          { id: "contenido", label: "Contenido" },
+          {
+            id: "fields",
+            label: "Fields",
+            badge: (
+              <span className="rounded-full bg-zinc-100 px-2 py-px text-[11px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                {form.fields.length}
+              </span>
+            ),
+          },
+          { id: "imagenes", label: "Imágenes y footer" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
-        <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-          <p className={labelClass}>Remitente (opcional)</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <label className={labelClass}>Nombre</label>
-              <input
-                className={inputClass}
-                value={form.senderName}
-                maxLength={80}
-                placeholder="Hubbert"
-                onChange={(e) => set("senderName", e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className={labelClass}>Avatar (URL)</label>
-              <input
-                className={inputClass}
-                value={form.senderAvatarUrl}
-                placeholder="https://…/logo.png"
-                onChange={(e) => set("senderAvatarUrl", e.target.value)}
-              />
-            </div>
-          </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Cambia el nombre y la foto con que aparece el mensaje. Se envía mediante un webhook del canal, así que el
-            bot necesita el permiso Gestionar webhooks. Déjalo vacío para enviarlo como Hubbert.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className={labelClass}>Título</label>
-          <input className={inputClass} value={form.title} onChange={(e) => set("title", e.target.value)} />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className={labelClass}>Descripción</label>
-          <textarea
-            className={inputClass}
-            rows={4}
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Color</label>
-            <input
-              type="color"
-              className="h-9 w-full rounded-md border border-zinc-300 dark:border-zinc-700"
-              value={form.color}
-              onChange={(e) => set("color", e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>URL (opcional, en el título)</label>
-            <input className={inputClass} value={form.url} onChange={(e) => set("url", e.target.value)} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Nombre del autor</label>
-            <input
-              className={inputClass}
-              value={form.authorName}
-              onChange={(e) => set("authorName", e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Icono del autor (URL)</label>
-            <input
-              className={inputClass}
-              value={form.authorIconUrl}
-              onChange={(e) => set("authorIconUrl", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Imagen (URL)</label>
-            <input
-              className={inputClass}
-              value={form.imageUrl}
-              onChange={(e) => set("imageUrl", e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Thumbnail (URL)</label>
-            <input
-              className={inputClass}
-              value={form.thumbnailUrl}
-              onChange={(e) => set("thumbnailUrl", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Footer</label>
-            <input
-              className={inputClass}
-              value={form.footerText}
-              onChange={(e) => set("footerText", e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Icono del footer (URL)</label>
-            <input
-              className={inputClass}
-              value={form.footerIconUrl}
-              onChange={(e) => set("footerIconUrl", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-          <input
-            type="checkbox"
-            checked={form.showTimestamp}
-            onChange={(e) => set("showTimestamp", e.target.checked)}
-          />
-          Mostrar timestamp actual
-        </label>
-
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <label className={labelClass}>Fields ({form.fields.length}/25)</label>
-            <button
-              type="button"
-              onClick={addField}
-              disabled={form.fields.length >= 25}
-              className="text-xs font-medium text-[#5865F2] hover:underline disabled:opacity-40"
-            >
-              + Agregar field
-            </button>
-          </div>
-          {form.fields.map((field) => (
-            <div key={field.key} className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-              <input
-                className={inputClass}
-                placeholder="Nombre"
-                value={field.name}
-                onChange={(e) => updateField(field.key, { name: e.target.value })}
-              />
-              <textarea
-                className={inputClass}
-                placeholder="Valor"
-                rows={2}
-                value={field.value}
-                onChange={(e) => updateField(field.key, { value: e.target.value })}
-              />
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
-                  <input
-                    type="checkbox"
-                    checked={field.inline}
-                    onChange={(e) => updateField(field.key, { inline: e.target.checked })}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+        <div className="flex min-w-0 flex-col gap-4">
+          {tab === "contenido" && (
+            <>
+              <SettingsCard title="General">
+                {field("name", "Nombre interno", { placeholder: "ej. Anuncio de evento" })}
+                {field("title", "Título")}
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass} htmlFor="embed-description">
+                    Descripción
+                  </label>
+                  <textarea
+                    id="embed-description"
+                    className={inputClass}
+                    rows={4}
+                    value={form.description}
+                    onChange={(e) => set("description", e.target.value)}
                   />
-                  Inline
-                </label>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[8rem_1fr]">
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass} htmlFor="embed-color">
+                      Color
+                    </label>
+                    <input
+                      id="embed-color"
+                      type="color"
+                      className="h-[34px] w-full cursor-pointer rounded-lg border border-zinc-300 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      value={form.color}
+                      onChange={(e) => set("color", e.target.value)}
+                    />
+                  </div>
+                  {field("url", "URL (opcional, en el título)")}
+                </div>
+              </SettingsCard>
+
+              <SettingsCard title="Autor">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {field("authorName", "Nombre del autor")}
+                  {field("authorIconUrl", "Icono del autor (URL)")}
+                </div>
+              </SettingsCard>
+
+              <SettingsCard
+                title="Remitente"
+                description="Opcional. Cambia el nombre y la foto con que aparece el mensaje. Se envía mediante un webhook del canal, así que el bot necesita el permiso Gestionar webhooks."
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {field("senderName", "Nombre", { maxLength: 80, placeholder: "Hubbert" })}
+                  {field("senderAvatarUrl", "Avatar (URL)", { placeholder: "https://…/logo.png" })}
+                </div>
+              </SettingsCard>
+            </>
+          )}
+
+          {tab === "fields" && (
+            <SettingsCard
+              title={`Fields (${form.fields.length}/25)`}
+              description="“En línea” pone hasta 3 fields por fila en Discord."
+              action={
                 <button
                   type="button"
-                  onClick={() => removeField(field.key)}
-                  className="text-xs text-red-600 hover:underline dark:text-red-400"
+                  onClick={addField}
+                  disabled={form.fields.length >= 25}
+                  className="rounded-lg border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
                 >
-                  Eliminar
+                  + Agregar field
                 </button>
-              </div>
-            </div>
-          ))}
+              }
+              flush
+            >
+              {form.fields.length === 0 && (
+                <p className="px-4 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                  Este embed todavía no tiene fields.
+                </p>
+              )}
+              {form.fields.map((f) => (
+                <div
+                  key={f.key}
+                  className="flex flex-col gap-2 border-t border-zinc-200 p-4 first:border-t-0 dark:border-zinc-800"
+                >
+                  <input
+                    className={inputClass}
+                    placeholder="Nombre"
+                    aria-label="Nombre del field"
+                    value={f.name}
+                    onChange={(e) => updateField(f.key, { name: e.target.value })}
+                  />
+                  <textarea
+                    className={inputClass}
+                    placeholder="Valor"
+                    aria-label="Valor del field"
+                    rows={2}
+                    value={f.value}
+                    onChange={(e) => updateField(f.key, { value: e.target.value })}
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+                      <Toggle
+                        size="sm"
+                        checked={f.inline}
+                        onChange={(v) => updateField(f.key, { inline: v })}
+                        label="En línea"
+                      />
+                      En línea
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeField(f.key)}
+                      className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-red-500/10 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </SettingsCard>
+          )}
+
+          {tab === "imagenes" && (
+            <>
+              <SettingsCard title="Imágenes">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {field("imageUrl", "Imagen (URL)")}
+                  {field("thumbnailUrl", "Thumbnail (URL)")}
+                </div>
+              </SettingsCard>
+
+              <SettingsCard title="Footer">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {field("footerText", "Texto")}
+                  {field("footerIconUrl", "Icono (URL)")}
+                </div>
+              </SettingsCard>
+
+              <SettingsCard flush>
+                <SettingRow title="Mostrar fecha y hora" description="Agrega el momento del envío al pie del embed.">
+                  <Toggle
+                    checked={form.showTimestamp}
+                    onChange={(v) => set("showTimestamp", v)}
+                    label="Mostrar fecha y hora"
+                  />
+                </SettingRow>
+              </SettingsCard>
+            </>
+          )}
         </div>
 
-        {message && (
-          <p
-            className={`text-sm ${
-              message.kind === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-            }`}
-          >
-            {message.text}
+        <div className="flex min-w-0 flex-col gap-2 xl:sticky xl:top-6 xl:self-start">
+          <p className="font-mono text-[10px] tracking-[0.16em] text-zinc-400 uppercase dark:text-zinc-500">
+            Vista previa
           </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving || !form.name.trim()}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            {saving ? "Guardando…" : "Guardar"}
-          </button>
-
-          <select
-            className={`${inputClass} max-w-[200px]`}
-            value={channelId}
-            onChange={(e) => setChannelId(e.target.value)}
-          >
-            <option value="">Elegir canal…</option>
-            {channels.map((c) => (
-              <option key={c.id} value={c.id}>
-                #{c.name}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={!embedId || !channelId || sending}
-            title={!embedId ? "Guarda el embed primero" : undefined}
-            className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4] disabled:opacity-50"
-          >
-            {sending ? "Enviando…" : "Enviar a Discord"}
-          </button>
+          <EmbedPreview data={previewData} />
         </div>
       </div>
 
-      <div className="xl:sticky xl:top-6 xl:self-start">
-        <p className={`${labelClass} mb-2`}>Vista previa</p>
-        <EmbedPreview data={previewData} />
-      </div>
+      <SaveBar dirty={dirty} message={message}>
+        <select
+          aria-label="Canal de envío"
+          className="max-w-[180px] rounded-lg border border-zinc-700 bg-transparent px-2 py-1.5 text-sm dark:border-zinc-300"
+          value={channelId}
+          onChange={(e) => setChannelId(e.target.value)}
+        >
+          <option value="">Elegir canal…</option>
+          {channels.map((c) => (
+            <option key={c.id} value={c.id}>
+              #{c.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={!embedId || !channelId || dirty || sending}
+          title={!embedId || dirty ? "Guarda los cambios primero" : undefined}
+          className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-zinc-700 hover:bg-white/10 disabled:opacity-40 dark:ring-zinc-300 dark:hover:bg-black/5"
+        >
+          {sending ? "Enviando…" : "Enviar a Discord"}
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving || !dirty || !form.name.trim()}
+          className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white hover:bg-accent-strong disabled:opacity-50"
+        >
+          {saving ? "Guardando…" : "Guardar"}
+        </button>
+      </SaveBar>
     </div>
   );
 }

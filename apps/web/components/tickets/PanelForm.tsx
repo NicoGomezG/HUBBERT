@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TICKET_MESSAGE_VARIABLES, TICKET_WELCOME_DEFAULT } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
+import { RolePicker } from "@/components/ui/RolePicker";
 
 interface Channel {
   id: string;
@@ -16,38 +17,6 @@ interface Role {
   color: number;
 }
 
-function RoleChecklist({
-  roles,
-  selected,
-  onChange,
-}: {
-  roles: Role[];
-  selected: string[];
-  onChange: (ids: string[]) => void;
-}) {
-  function toggle(id: string) {
-    onChange(selected.includes(id) ? selected.filter((r) => r !== id) : [...selected, id]);
-  }
-
-  if (roles.length === 0) {
-    return <p className="text-xs text-zinc-500 dark:text-zinc-400">Cargando roles…</p>;
-  }
-
-  return (
-    <div className="flex max-h-40 flex-col gap-1 overflow-y-auto rounded-md border border-zinc-300 p-2 dark:border-zinc-700">
-      {roles.map((role) => (
-        <label key={role.id} className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
-          <input type="checkbox" checked={selected.includes(role.id)} onChange={() => toggle(role.id)} />
-          <span
-            className="h-2.5 w-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: role.color ? `#${role.color.toString(16).padStart(6, "0")}` : "#99aab5" }}
-          />
-          @{role.name}
-        </label>
-      ))}
-    </div>
-  );
-}
 
 const BUTTON_STYLES = [
   { value: "primary", label: "Azul" },
@@ -283,7 +252,7 @@ export function PanelForm({ guildId, initial }: { guildId: string; initial?: Tic
   
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Quién ve los tickets de este panel</label>
-          <RoleChecklist roles={roles} selected={staffRoleIds} onChange={setStaffRoleIds} />
+          <RolePicker roles={roles} selected={staffRoleIds} onChange={setStaffRoleIds} />
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Siempre los ven quien abrió el ticket y los administradores. Marca roles para sumar a otros (por ejemplo
             @kpop) — también podrán cerrarlos.
@@ -292,7 +261,7 @@ export function PanelForm({ guildId, initial }: { guildId: string; initial?: Tic
   
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Quién puede abrir tickets (opcional)</label>
-          <RoleChecklist roles={roles} selected={requiredRoleIds} onChange={setRequiredRoleIds} />
+          <RolePicker roles={roles} selected={requiredRoleIds} onChange={setRequiredRoleIds} />
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Si marcas roles, solo quien tenga al menos uno de ellos puede apretar el botón. Sin marcar: cualquiera.
           </p>

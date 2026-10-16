@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { daysUntilReminder, formatReminderDate, listReminders } from "@hubbert/modules";
+import { daysUntilReminder, listReminders } from "@hubbert/modules";
 import { fetchGuildTextChannels } from "@hubbert/discord";
 import { deleteReminderAction, toggleActiveAction } from "./actions";
+import { ListCard, ListRow } from "@/components/ui/ListRow";
 
 function relativeLabel(remaining: number): string {
   if (remaining < 0) return "Vencido";
@@ -47,68 +48,21 @@ export default async function RemindersPage({
       )}
 
       {reminders.length > 0 && (
-        <div className="overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-left text-xs text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
-              <tr>
-                <th className="px-4 py-2 font-medium">Título</th>
-                <th className="px-4 py-2 font-medium">Fecha</th>
-                <th className="px-4 py-2 font-medium">Anticipación</th>
-                <th className="px-4 py-2 font-medium">Canal</th>
-                <th className="px-4 py-2 font-medium">Estado</th>
-                <th className="px-4 py-2 font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reminders.map((r) => {
-                const remaining = daysUntilReminder(r.targetDate);
-                return (
-                  <tr key={r.id} className="border-t border-zinc-200 dark:border-zinc-800">
-                    <td className="px-4 py-2 text-zinc-900 dark:text-zinc-50">{r.title}</td>
-                    <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">
-                      {formatReminderDate(r.targetDate)}
-                      <span className="ml-1 text-xs text-zinc-400">({relativeLabel(remaining)})</span>
-                    </td>
-                    <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">
-                      {r.daysBefore} día{r.daysBefore === 1 ? "" : "s"} ·{" "}
-                      {r.repeatMode === "daily" ? "diario" : "una vez"}
-                    </td>
-                    <td className="px-4 py-2 text-zinc-600 dark:text-zinc-300">#{channelName(r.channelId)}</td>
-                    <td className="px-4 py-2">
-                      <form action={toggleActiveAction.bind(null, guildId, r.id)}>
-                        <button
-                          type="submit"
-                          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                            r.isActive
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                              : "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                          }`}
-                        >
-                          {r.isActive ? "Activo" : "Inactivo"}
-                        </button>
-                      </form>
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-3">
-                        <Link
-                          href={`/servers/${guildId}/reminders/${r.id}`}
-                          className="text-xs font-medium text-[#5865F2] hover:underline"
-                        >
-                          Editar
-                        </Link>
-                        <form action={deleteReminderAction.bind(null, guildId, r.id)}>
-                          <button type="submit" className="text-xs text-red-600 hover:underline dark:text-red-400">
-                            Eliminar
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <ListCard>
+          {reminders.map((r) => (
+            <ListRow
+              key={r.id}
+              day={r.targetDate.getUTCDate()}
+              month={r.targetDate.getUTCMonth() + 1}
+              title={r.title}
+              meta={`${relativeLabel(daysUntilReminder(r.targetDate))} · ${r.daysBefore} día${r.daysBefore === 1 ? "" : "s"} antes, ${r.repeatMode === "daily" ? "diario" : "una vez"} · #${channelName(r.channelId)}`}
+              isActive={r.isActive}
+              toggleAction={toggleActiveAction.bind(null, guildId, r.id)}
+              deleteAction={deleteReminderAction.bind(null, guildId, r.id)}
+              editHref={`/servers/${guildId}/reminders/${r.id}`}
+            />
+          ))}
+        </ListCard>
       )}
     </div>
   );

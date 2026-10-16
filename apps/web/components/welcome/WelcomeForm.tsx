@@ -11,6 +11,19 @@ import {
   renderWelcomeMessage,
 } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
+import {
+  ModuleToggle,
+  SaveBar,
+  SettingRow,
+  SettingsCard,
+  StatusPill,
+  SubTabs,
+  Toggle,
+  inputClass,
+  labelClass,
+} from "@/components/ui/settings";
+
+const colorClass = "h-[34px] w-full cursor-pointer rounded-lg border border-zinc-300 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900";
 
 interface Channel {
   id: string;
@@ -74,7 +87,8 @@ export function WelcomeForm({
   initial: WelcomeFormInitial;
 }) {
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [form, setForm] = useState({
+  const [tab, setTab] = useState<"bienvenida" | "despedida">("bienvenida");
+  const [saved, setSaved] = useState(() => ({
     welcomeEnabled: initial.welcomeEnabled,
     welcomeChannelId: initial.welcomeChannelId ?? "",
     welcomeTitle: initial.welcomeTitle ?? "",
@@ -93,7 +107,9 @@ export function WelcomeForm({
     senderAvatarUrl: initial.senderAvatarUrl ?? "",
     goodbyeEnabled: initial.goodbyeEnabled,
     goodbyeMessage: initial.goodbyeMessage,
-  });
+  }));
+  const [form, setForm] = useState(saved);
+  const dirty = JSON.stringify(form) !== JSON.stringify(saved);
   const [busy, setBusy] = useState<null | "save" | "welcome" | "goodbye">(null);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
@@ -108,6 +124,7 @@ export function WelcomeForm({
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setMessage(null);
   }
 
   // La tarjeta se genera en el servidor: se espera a que deje de escribir para no pedir una imagen por tecla.
@@ -155,6 +172,7 @@ export function WelcomeForm({
   );
 
   async function save(): Promise<boolean> {
+    const snapshot = form;
     const res = await fetch(`/api/guilds/${guildId}/welcome`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -171,7 +189,8 @@ export function WelcomeForm({
       }),
     });
     const json = await res.json();
-    if (!json.success) setMessage({ kind: "error", text: json.error.message });
+    if (json.success) setSaved(snapshot);
+    else setMessage({ kind: "error", text: json.error.message });
     return json.success;
   }
 
@@ -208,301 +227,388 @@ export function WelcomeForm({
     setBusy(null);
   }
 
-  const inputClass =
-    "w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#5865F2] focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50";
-  const labelClass = "text-xs font-medium text-zinc-600 dark:text-zinc-400";
-  const sectionClass = "grid grid-cols-1 gap-8 xl:grid-cols-2";
-  const toggleClass = "flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-50";
-  const testButtonClass =
-    "w-fit rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900";
+  const goodbyeTab = tab === "despedida";
 
   return (
-    <div className="flex flex-col gap-10">
-      <section className={sectionClass}>
-        <div className="flex flex-col gap-4">
-          <div>
-            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Bienvenida</h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Se publica en un canal cada vez que entra alguien al servidor.
-            </p>
-          </div>
+    <div className="flex flex-col gap-5">
+      <SubTabs
+        tabs={[
+          { id: "bienvenida", label: "Bienvenida", badge: <StatusPill on={form.welcomeEnabled} /> },
+          { id: "despedida", label: "Despedida", badge: <StatusPill on={form.goodbyeEnabled} /> },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
-          <label className={toggleClass}>
-            <input
-              type="checkbox"
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+        {!goodbyeTab ? (
+          <div className="flex min-w-0 flex-col gap-4">
+            <ModuleToggle
+              icon={<SparkIcon />}
+              title="Mensaje de bienvenida"
+              description="Se publica en un canal cada vez que entra alguien al servidor."
               checked={form.welcomeEnabled}
-              onChange={(e) => set("welcomeEnabled", e.target.checked)}
+              onChange={(v) => set("welcomeEnabled", v)}
             />
-            Activar bienvenida
-          </label>
 
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Canal</label>
-            <select
-              className={inputClass}
-              value={form.welcomeChannelId}
-              onChange={(e) => set("welcomeChannelId", e.target.value)}
-            >
-              <option value="">Elegir canal…</option>
-              {channels.map((c) => (
-                <option key={c.id} value={c.id}>
-                  #{c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-            <p className={labelClass}>Remitente (opcional)</p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <input
-                className={inputClass}
-                value={form.senderName}
-                maxLength={80}
-                placeholder="Nombre (Hubbert)"
-                onChange={(e) => set("senderName", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                value={form.senderAvatarUrl}
-                placeholder="Avatar (URL)"
-                onChange={(e) => set("senderAvatarUrl", e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Título</label>
-            <input
-              className={inputClass}
-              value={form.welcomeTitle}
-              maxLength={256}
-              onChange={(e) => set("welcomeTitle", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Mensaje</label>
-            <textarea
-              className={inputClass}
-              rows={3}
-              value={form.welcomeMessage}
-              onChange={(e) => set("welcomeMessage", e.target.value)}
-            />
-            <VariableList variables={WELCOME_MESSAGE_VARIABLES} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <label className={labelClass}>Color</label>
-              <input
-                type="color"
-                className="h-9 w-full rounded-md border border-zinc-300 dark:border-zinc-700"
-                value={form.welcomeColor}
-                onChange={(e) => set("welcomeColor", e.target.value)}
-              />
-            </div>
-            {!form.cardEnabled && (
-              <div className="flex flex-col gap-1">
-                <label className={labelClass}>Imagen debajo (URL, opcional)</label>
-                <input
-                  className={inputClass}
-                  value={form.welcomeImageUrl}
-                  placeholder="https://…/banner.png"
-                  onChange={(e) => set("welcomeImageUrl", e.target.value)}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-            <label className={toggleClass}>
-              <input
-                type="checkbox"
-                checked={form.cardEnabled}
-                onChange={(e) => set("cardEnabled", e.target.checked)}
-              />
-              Tarjeta con imagen (estilo Koya)
-            </label>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Genera una imagen con tu fondo, el avatar del nuevo miembro en un círculo y los textos encima. El aro del
-              avatar usa el color de arriba.
-            </p>
-
-            {form.cardEnabled && (
-              <>
+            <SettingsCard title="Contenido" description="Dónde y qué se publica." disabled={!form.welcomeEnabled}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_8rem]">
                 <div className="flex flex-col gap-1">
-                  <label className={labelClass}>Fondo (URL de imagen PNG o JPG)</label>
-                  <input
-                    className={inputClass}
-                    value={form.cardBackgroundUrl}
-                    placeholder="https://…/fondo.png — vacío: degradado con el color"
-                    onChange={(e) => set("cardBackgroundUrl", e.target.value)}
-                  />
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Tamaño ideal: 1024 × 450. Si la imagen no carga o es WebP/GIF, se usa el degradado.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_5rem]">
-                  <div className="flex flex-col gap-1">
-                    <label className={labelClass}>Título</label>
-                    <input
-                      className={inputClass}
-                      value={form.cardTitle}
-                      maxLength={60}
-                      onChange={(e) => set("cardTitle", e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className={labelClass}>Subtítulo</label>
-                    <input
-                      className={inputClass}
-                      value={form.cardSubtitle}
-                      maxLength={80}
-                      onChange={(e) => set("cardSubtitle", e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className={labelClass}>Texto</label>
-                    <input
-                      type="color"
-                      className="h-9 w-full rounded-md border border-zinc-300 dark:border-zinc-700"
-                      value={form.cardTextColor}
-                      onChange={(e) => set("cardTextColor", e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className={labelClass}>Fuente del texto</label>
+                  <label className={labelClass} htmlFor="welcome-channel">
+                    Canal
+                  </label>
                   <select
+                    id="welcome-channel"
                     className={inputClass}
-                    value={form.cardFont}
-                    onChange={(e) => set("cardFont", e.target.value)}
+                    value={form.welcomeChannelId}
+                    onChange={(e) => set("welcomeChannelId", e.target.value)}
                   >
-                    {CARD_FONTS.map((f) => (
-                      <option key={f.value} value={f.value}>
-                        {f.label}
+                    <option value="">Elegir canal…</option>
+                    {channels.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        #{c.name}
                       </option>
                     ))}
                   </select>
                 </div>
-                <VariableList variables={CARD_TEXT_VARIABLES} />
-              </>
-            )}
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass} htmlFor="welcome-color">
+                    Color
+                  </label>
+                  <input
+                    id="welcome-color"
+                    type="color"
+                    className={colorClass}
+                    value={form.welcomeColor}
+                    onChange={(e) => set("welcomeColor", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className={labelClass} htmlFor="welcome-title">
+                  Título
+                </label>
+                <input
+                  id="welcome-title"
+                  className={inputClass}
+                  value={form.welcomeTitle}
+                  maxLength={256}
+                  onChange={(e) => set("welcomeTitle", e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className={labelClass} htmlFor="welcome-message">
+                  Mensaje
+                </label>
+                <textarea
+                  id="welcome-message"
+                  className={inputClass}
+                  rows={3}
+                  value={form.welcomeMessage}
+                  onChange={(e) => set("welcomeMessage", e.target.value)}
+                />
+                <VariableList variables={WELCOME_MESSAGE_VARIABLES} />
+              </div>
+            </SettingsCard>
+
+            <SettingsCard
+              title="Tarjeta con imagen"
+              description="Fondo + avatar del nuevo miembro en un círculo + textos. El aro del avatar usa el color del embed."
+              action={
+                <Toggle
+                  checked={form.cardEnabled}
+                  onChange={(v) => set("cardEnabled", v)}
+                  label="Tarjeta con imagen"
+                  disabled={!form.welcomeEnabled}
+                />
+              }
+              disabled={!form.welcomeEnabled}
+            >
+              {form.cardEnabled ? (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass} htmlFor="card-bg">
+                      Fondo (URL de imagen PNG o JPG)
+                    </label>
+                    <input
+                      id="card-bg"
+                      className={inputClass}
+                      value={form.cardBackgroundUrl}
+                      placeholder="https://…/fondo.png — vacío: degradado con el color"
+                      onChange={(e) => set("cardBackgroundUrl", e.target.value)}
+                    />
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Tamaño ideal: 1024 × 450. Si la imagen no carga o es WebP/GIF, se usa el degradado.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1">
+                      <label className={labelClass} htmlFor="card-title">
+                        Título
+                      </label>
+                      <input
+                        id="card-title"
+                        className={inputClass}
+                        value={form.cardTitle}
+                        maxLength={60}
+                        onChange={(e) => set("cardTitle", e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className={labelClass} htmlFor="card-subtitle">
+                        Subtítulo
+                      </label>
+                      <input
+                        id="card-subtitle"
+                        className={inputClass}
+                        value={form.cardSubtitle}
+                        maxLength={80}
+                        onChange={(e) => set("cardSubtitle", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_8rem]">
+                    <div className="flex flex-col gap-1">
+                      <label className={labelClass} htmlFor="card-font">
+                        Fuente del texto
+                      </label>
+                      <select
+                        id="card-font"
+                        className={inputClass}
+                        value={form.cardFont}
+                        onChange={(e) => set("cardFont", e.target.value)}
+                      >
+                        {CARD_FONTS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className={labelClass} htmlFor="card-text-color">
+                        Color del texto
+                      </label>
+                      <input
+                        id="card-text-color"
+                        type="color"
+                        className={colorClass}
+                        value={form.cardTextColor}
+                        onChange={(e) => set("cardTextColor", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <VariableList variables={CARD_TEXT_VARIABLES} />
+                </>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass} htmlFor="welcome-image">
+                    Imagen debajo del mensaje (URL, opcional)
+                  </label>
+                  <input
+                    id="welcome-image"
+                    className={inputClass}
+                    value={form.welcomeImageUrl}
+                    placeholder="https://…/banner.png"
+                    onChange={(e) => set("welcomeImageUrl", e.target.value)}
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Activa la tarjeta para generar una imagen con el avatar del nuevo miembro.
+                  </p>
+                </div>
+              )}
+            </SettingsCard>
+
+            <SettingsCard title="Opciones" flush disabled={!form.welcomeEnabled}>
+              <SettingRow
+                title="Mostrar avatar"
+                description={
+                  form.cardEnabled
+                    ? "No aplica: la tarjeta ya muestra el avatar."
+                    : "Miniatura del nuevo miembro arriba a la derecha."
+                }
+                dimmed={form.cardEnabled}
+              >
+                <Toggle
+                  checked={form.showAvatar}
+                  onChange={(v) => set("showAvatar", v)}
+                  label="Mostrar avatar"
+                  disabled={form.cardEnabled}
+                />
+              </SettingRow>
+              <SettingRow title="Mencionar al miembro" description="Le llega la notificación cuando se publica.">
+                <Toggle checked={form.pingMember} onChange={(v) => set("pingMember", v)} label="Mencionar al miembro" />
+              </SettingRow>
+            </SettingsCard>
+
+            <SettingsCard
+              title="Remitente"
+              description="Opcional. Vacío usa el nombre y el avatar de Hubbert."
+              disabled={!form.welcomeEnabled}
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass} htmlFor="sender-name">
+                    Nombre
+                  </label>
+                  <input
+                    id="sender-name"
+                    className={inputClass}
+                    value={form.senderName}
+                    maxLength={80}
+                    placeholder="Hubbert"
+                    onChange={(e) => set("senderName", e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass} htmlFor="sender-avatar">
+                    Avatar (URL)
+                  </label>
+                  <input
+                    id="sender-avatar"
+                    className={inputClass}
+                    value={form.senderAvatarUrl}
+                    placeholder="https://…"
+                    onChange={(e) => set("senderAvatarUrl", e.target.value)}
+                  />
+                </div>
+              </div>
+            </SettingsCard>
           </div>
-
-          {!form.cardEnabled && (
-            <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-              <input
-                type="checkbox"
-                checked={form.showAvatar}
-                onChange={(e) => set("showAvatar", e.target.checked)}
-              />
-              Mostrar el avatar del nuevo miembro
-            </label>
-          )}
-          <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-            <input type="checkbox" checked={form.pingMember} onChange={(e) => set("pingMember", e.target.checked)} />
-            Mencionarlo para que le llegue la notificación
-          </label>
-
-          <button
-            type="button"
-            onClick={() => handleTest("welcome")}
-            disabled={busy !== null}
-            className={testButtonClass}
-          >
-            {busy === "welcome" ? "Enviando…" : "Probar bienvenida"}
-          </button>
-        </div>
-
-        <div className="xl:sticky xl:top-6 xl:self-start">
-          <p className={`${labelClass} mb-2`}>Vista previa</p>
-          <EmbedPreview data={welcomePreview} />
-        </div>
-      </section>
-
-      <section className={`${sectionClass} border-t border-zinc-200 pt-8 dark:border-zinc-800`}>
-        <div className="flex flex-col gap-4">
-          <div>
-            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Despedida</h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Se manda por mensaje privado a quien sale del servidor, junto con la info de Hubbert (panel, funciones,
-              donaciones y el Discord del creador).
-            </p>
-          </div>
-
-          <label className={toggleClass}>
-            <input
-              type="checkbox"
+        ) : (
+          <div className="flex min-w-0 flex-col gap-4">
+            <ModuleToggle
+              icon={<WaveIcon />}
+              title="Mensaje de despedida"
+              description="Se manda por DM a quien sale del servidor, junto con la info de Hubbert."
               checked={form.goodbyeEnabled}
-              onChange={(e) => set("goodbyeEnabled", e.target.checked)}
+              onChange={(v) => set("goodbyeEnabled", v)}
             />
-            Activar despedida
-          </label>
 
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Mensaje</label>
-            <textarea
-              className={inputClass}
-              rows={3}
-              maxLength={1500}
-              value={form.goodbyeMessage}
-              onChange={(e) => set("goodbyeMessage", e.target.value)}
-            />
-            <VariableList variables={GOODBYE_MESSAGE_VARIABLES} />
+            <SettingsCard title="Contenido" disabled={!form.goodbyeEnabled}>
+              <div className="flex flex-col gap-1">
+                <label className={labelClass} htmlFor="goodbye-message">
+                  Mensaje
+                </label>
+                <textarea
+                  id="goodbye-message"
+                  className={inputClass}
+                  rows={3}
+                  maxLength={1500}
+                  value={form.goodbyeMessage}
+                  onChange={(e) => set("goodbyeMessage", e.target.value)}
+                />
+                <VariableList variables={GOODBYE_MESSAGE_VARIABLES} />
+              </div>
+              <p className="rounded-lg bg-zinc-50 p-3 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+                Discord solo deja mandar mensajes privados a quien todavía comparte algún servidor con Hubbert y tiene
+                los DMs abiertos. Si no, la despedida no le llega (no aparece ningún error en el servidor).
+              </p>
+            </SettingsCard>
           </div>
+        )}
 
-          <p className="rounded-md bg-zinc-50 p-3 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-            Discord solo deja mandar mensajes privados a quien todavía comparte algún servidor con Hubbert y tiene los
-            DMs abiertos. Si no, la despedida no le llega (no aparece ningún error en el servidor).
-          </p>
+        <div className="flex min-w-0 flex-col gap-2 xl:sticky xl:top-6 xl:self-start">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-mono text-[10px] tracking-[0.16em] text-zinc-400 uppercase dark:text-zinc-500">
+              {goodbyeTab ? "Vista previa · mensaje privado" : "Vista previa"}
+            </p>
+            <button
+              type="button"
+              onClick={() => handleTest(goodbyeTab ? "goodbye" : "welcome")}
+              disabled={busy !== null}
+              className="rounded-lg border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            >
+              {busy === "welcome" || busy === "goodbye"
+                ? "Enviando…"
+                : goodbyeTab
+                  ? "Probar (te llega por DM)"
+                  : "Probar en Discord"}
+            </button>
+          </div>
+          {goodbyeTab ? (
+            <>
+              <EmbedPreview data={goodbyePreview} />
+              <div className="flex flex-wrap gap-2">
+                {HUBBERT_PROMO_BUTTONS.map((b) => (
+                  <span key={b.url} className="rounded bg-[#4e5058] px-3 py-1 text-sm font-medium text-white">
+                    {b.emoji} {b.label} ↗
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                El bloque de Hubbert y los botones van siempre y no se pueden editar.
+              </p>
+            </>
+          ) : (
+            <EmbedPreview data={welcomePreview} />
+          )}
+        </div>
+      </div>
 
+      <SaveBar dirty={dirty} message={message}>
+        {dirty && (
           <button
             type="button"
-            onClick={() => handleTest("goodbye")}
+            onClick={() => {
+              setForm(saved);
+              setMessage(null);
+            }}
             disabled={busy !== null}
-            className={testButtonClass}
+            className="rounded-lg px-3 py-1.5 text-sm font-medium opacity-70 hover:opacity-100 disabled:opacity-40"
           >
-            {busy === "goodbye" ? "Enviando…" : "Probar despedida (te llega por DM)"}
+            Descartar
           </button>
-        </div>
-
-        <div className="xl:sticky xl:top-6 xl:self-start">
-          <p className={`${labelClass} mb-2`}>Vista previa (mensaje privado)</p>
-          <EmbedPreview data={goodbyePreview} />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {HUBBERT_PROMO_BUTTONS.map((b) => (
-              <span key={b.url} className="rounded bg-[#4e5058] px-3 py-1 text-sm font-medium text-white">
-                {b.emoji} {b.label} ↗
-              </span>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-            El bloque de Hubbert y los botones van siempre y no se pueden editar.
-          </p>
-        </div>
-      </section>
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        )}
         <button
           type="button"
           onClick={handleSave}
-          disabled={busy !== null}
-          className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4] disabled:opacity-50"
+          disabled={busy !== null || !dirty}
+          className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white hover:bg-accent-strong disabled:opacity-50"
         >
-          {busy === "save" ? "Guardando…" : "Guardar"}
+          {busy === "save" ? "Guardando…" : "Guardar cambios"}
         </button>
-        {message && (
-          <p
-            className={`text-sm ${
-              message.kind === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-            }`}
-          >
-            {message.text}
-          </p>
-        )}
-      </div>
+      </SaveBar>
     </div>
+  );
+}
+
+function SparkIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+      <path d="M19 16v5" />
+      <path d="M16.5 18.5h5" />
+    </svg>
+  );
+}
+
+function WaveIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5" />
+      <path d="M21 12H9" />
+    </svg>
   );
 }

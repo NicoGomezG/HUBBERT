@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { REMINDER_MESSAGE_VARIABLES } from "@hubbert/modules/client";
+import { SettingRow, SettingsCard, Toggle } from "@/components/ui/settings";
 
 interface Channel {
   id: string;
@@ -219,10 +220,11 @@ export function ReminderForm({
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-        <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-        Activo
-      </label>
+      <SettingsCard flush>
+        <SettingRow title="Activo" description="Si lo apagas, se guarda pero no se envía el aviso.">
+          <Toggle checked={isActive} onChange={setIsActive} label="Activo" />
+        </SettingRow>
+      </SettingsCard>
 
       {message && <p className="text-sm text-red-600 dark:text-red-400">{message.text}</p>}
 
