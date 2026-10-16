@@ -5,6 +5,8 @@ import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const APP_VERSION = "1.1";
+
 type IconName =
   | "embeds"
   | "bienvenida"
@@ -179,8 +181,13 @@ function SidebarContent({
         <Image src="/logo.png" alt="" width={30} height={30} />
         <div className="flex flex-col leading-none">
           <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Hubbert</span>
-          <span className={`${brandFontClass} mt-0.5 text-[11px] tracking-wide text-zinc-500 dark:text-zinc-400`}>
-            made by NGZ
+          <span
+            className={`${brandFontClass} mt-1 text-[9px] font-medium tracking-[0.14em] text-zinc-500 uppercase dark:text-zinc-400`}
+          >
+            hecho por NGZ
+          </span>
+          <span className={`${brandFontClass} mt-0.5 text-[9px] font-bold tracking-[0.14em] text-accent`}>
+            v{APP_VERSION}
           </span>
         </div>
       </Link>

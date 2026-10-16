@@ -1,9 +1,9 @@
-import { Metal_Mania } from "next/font/google";
+import { Orbitron } from "next/font/google";
 import { prisma } from "@hubbert/db";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { Sidebar, type SidebarGuild, type SidebarUser } from "@/components/Sidebar";
 
-const metalMania = Metal_Mania({ weight: "400", subsets: ["latin"] });
+const orbitron = Orbitron({ weight: ["500", "700"], subsets: ["latin"] });
 
 export default async function ServersLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -30,7 +30,7 @@ export default async function ServersLayout({ children }: { children: React.Reac
   return (
     <div className="relative min-h-screen bg-zinc-50 dark:bg-black">
       <div aria-hidden className="app-backdrop" />
-      <Sidebar guilds={guilds} user={sidebarUser} brandFontClass={metalMania.className} />
+      <Sidebar guilds={guilds} user={sidebarUser} brandFontClass={orbitron.className} />
       <div className="relative z-10 lg:pl-64">
         <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">{children}</main>
       </div>
