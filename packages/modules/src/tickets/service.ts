@@ -65,13 +65,20 @@ export function listPanels(guildId: string) {
   return prisma.ticketPanel.findMany({ where: { guildId }, orderBy: { createdAt: "desc" } });
 }
 
-export function listTickets(guildId: string) {
+export function listTickets(guildId: string, status?: "open" | "closed", take = 100) {
   return prisma.ticket.findMany({
-    where: { guildId },
+    where: { guildId, ...(status && { status }) },
     include: { panel: { select: { title: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 100,
+    orderBy: status === "closed" ? { closedAt: "desc" } : { createdAt: "desc" },
+    take,
   });
+}
+
+/** Cantidad total de tickets abiertos y cerrados (sin el límite de listTickets). */
+export async function countTicketsByStatus(guildId: string) {
+  const groups = await prisma.ticket.groupBy({ by: ["status"], where: { guildId }, _count: true });
+  const count = (status: string) => groups.find((g) => g.status === status)?._count ?? 0;
+  return { open: count("open"), closed: count("closed") };
 }
 
 export async function getPanel(guildId: string, panelId: string) {

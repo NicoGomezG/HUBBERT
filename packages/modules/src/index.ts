@@ -48,6 +48,7 @@ export {
 export {
   listPanels,
   listTickets,
+  countTicketsByStatus,
   getPanel,
   createPanel,
   updatePanel,

@@ -1,6 +1,8 @@
 // Piezas compartidas de los formularios del panel: toggle, filas de ajuste, cards y sub-tabs.
 // Sin "use client": se pueden renderizar tanto desde server como desde client components.
 
+import Link from "next/link";
+
 export function Toggle({
   checked,
   onChange,
@@ -175,11 +177,7 @@ export function SubTabs<T extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(tab.id)}
-            className={`-mb-px flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm whitespace-nowrap transition-colors ${
-              selected
-                ? "border-accent font-medium text-zinc-900 dark:text-zinc-50"
-                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-            }`}
+            className={tabClass(selected)}
           >
             {tab.label}
             {tab.badge}
@@ -187,6 +185,53 @@ export function SubTabs<T extends string>({
         );
       })}
     </div>
+  );
+}
+
+const tabClass = (selected: boolean) =>
+  `-mb-px flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm whitespace-nowrap transition-colors ${
+    selected
+      ? "border-accent font-medium text-zinc-900 dark:text-zinc-50"
+      : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+  }`;
+
+/** Igual que SubTabs, pero cada tab es un link (la tab activa vive en la URL). Sirve en server components. */
+export function LinkTabs({
+  tabs,
+  active,
+}: {
+  tabs: { id: string; label: string; href: string; badge?: React.ReactNode }[];
+  active: string;
+}) {
+  return (
+    <nav className="flex gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800">
+      {tabs.map((tab) => (
+        <Link
+          key={tab.id}
+          href={tab.href}
+          scroll={false}
+          aria-current={tab.id === active ? "page" : undefined}
+          className={tabClass(tab.id === active)}
+        >
+          {tab.label}
+          {tab.badge}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+export function CountBadge({ count, tone = "neutral" }: { count: number; tone?: "neutral" | "ok" }) {
+  return (
+    <span
+      className={`rounded-full px-2 py-px text-[11px] font-medium tabular-nums ${
+        tone === "ok" && count > 0
+          ? "bg-emerald-500/12 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
+          : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+      }`}
+    >
+      {count}
+    </span>
   );
 }
 
