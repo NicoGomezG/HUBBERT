@@ -61,8 +61,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ gui
   const avatarUrl = typeof metadata.avatar_url === "string" ? metadata.avatar_url : undefined;
   const cat = SUGGESTION_CATEGORIES[category];
 
+  // El avatar apunta al logo que sirve la propia app, así funciona en producción y en cada preview sin
+  // hardcodear el dominio. En local (http://localhost) Discord no puede descargarlo: se omite y usa el del webhook.
+  const origin = new URL(request.url).origin;
+  const appAvatarUrl = origin.startsWith("https://") ? `${origin}/logo.png` : undefined;
+
   const payload = {
     username: "Hubbert · Sugerencias",
+    avatar_url: appAvatarUrl,
     // Vacío: el texto del usuario nunca puede disparar @everyone, @here ni menciones a roles.
     allowed_mentions: { parse: [] },
     embeds: [
