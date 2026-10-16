@@ -106,6 +106,17 @@ const GROUPS: { label: string; sections: HelpSection[] }[] = [
         ],
       },
       {
+        slug: "sugerencias",
+        title: "Sugerencias",
+        summary: "Propón ideas o reporta errores directo al desarrollador.",
+        steps: [
+          "Ve a Sugerencias y elige el tipo: nueva función, mejora, error u otra.",
+          "Escribe un título y una descripción de al menos 20 caracteres. Si es un error, cuenta qué hiciste y qué pasó.",
+          "Activa \"Quiero apoyar esta idea con una donación\" para que tu sugerencia llegue destacada.",
+          "Puedes mandar una sugerencia por minuto.",
+        ],
+      },
+      {
         slug: "donaciones",
         title: "Donaciones",
         summary: "Apoya el desarrollo de Hubbert.",

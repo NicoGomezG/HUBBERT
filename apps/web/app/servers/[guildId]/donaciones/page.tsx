@@ -1,6 +1,4 @@
-const MERCADOPAGO_URL = "https://link.mercadopago.cl/hubbertbot";
-
-const SUGGESTED_AMOUNTS = ["$2.000", "$5.000", "$10.000", "$20.000"] as const;
+import { MERCADOPAGO_URL, SUGGESTED_AMOUNTS } from "@/lib/donations";
 
 export default function DonacionesPage() {
   return (
