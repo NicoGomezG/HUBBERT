@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmbedPreview } from "./EmbedPreview";
 import { SaveBar, SettingRow, SettingsCard, SubTabs, Toggle, inputClass, labelClass } from "@/components/ui/settings";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 
 interface FieldValue {
   key: string;
@@ -252,12 +253,12 @@ export function EmbedBuilder({
                   <label className={labelClass} htmlFor="embed-description">
                     Descripción
                   </label>
-                  <textarea
+                  <MessageEditor
+                    guildId={guildId}
                     id="embed-description"
-                    className={inputClass}
                     rows={4}
                     value={form.description}
-                    onChange={(e) => set("description", e.target.value)}
+                    onChange={(v) => set("description", v)}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[8rem_1fr]">
@@ -329,13 +330,13 @@ export function EmbedBuilder({
                     value={f.name}
                     onChange={(e) => updateField(f.key, { name: e.target.value })}
                   />
-                  <textarea
-                    className={inputClass}
+                  <MessageEditor
+                    guildId={guildId}
                     placeholder="Valor"
                     aria-label="Valor del field"
                     rows={2}
                     value={f.value}
-                    onChange={(e) => updateField(f.key, { value: e.target.value })}
+                    onChange={(v) => updateField(f.key, { value: v })}
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">

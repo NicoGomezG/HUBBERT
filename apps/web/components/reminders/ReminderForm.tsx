@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { REMINDER_MESSAGE_VARIABLES } from "@hubbert/modules/client";
 import { SettingRow, SettingsCard, Toggle } from "@/components/ui/settings";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 
 interface Channel {
   id: string;
@@ -126,11 +127,11 @@ export function ReminderForm({
 
       <div className="flex flex-col gap-1">
         <label className={labelClass}>Descripción (opcional)</label>
-        <textarea
-          className={inputClass}
+        <MessageEditor
+          guildId={guildId}
           rows={2}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={setDescription}
         />
       </div>
 
@@ -180,11 +181,11 @@ export function ReminderForm({
 
       <div className="flex flex-col gap-1">
         <label className={labelClass}>Mensaje personalizado (opcional)</label>
-        <textarea
-          className={inputClass}
+        <MessageEditor
+          guildId={guildId}
           rows={2}
           value={customMessage}
-          onChange={(e) => setCustomMessage(e.target.value)}
+          onChange={setCustomMessage}
           placeholder="Si lo dejas vacío, se usa un mensaje automático según los días restantes."
         />
         <ul className="flex flex-col gap-0.5 text-xs text-zinc-500 dark:text-zinc-400">

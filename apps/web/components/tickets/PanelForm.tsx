@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TICKET_MESSAGE_VARIABLES, TICKET_WELCOME_DEFAULT } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
 import { RolePicker } from "@/components/ui/RolePicker";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 
 interface Channel {
   id: string;
@@ -177,11 +178,11 @@ export function PanelForm({ guildId, initial }: { guildId: string; initial?: Tic
   
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Descripción</label>
-          <textarea
-            className={inputClass}
+          <MessageEditor
+            guildId={guildId}
             rows={3}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={setDescription}
           />
         </div>
   
@@ -235,11 +236,11 @@ export function PanelForm({ guildId, initial }: { guildId: string; initial?: Tic
   
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Mensaje de bienvenida al abrir el ticket</label>
-          <textarea
-            className={inputClass}
+          <MessageEditor
+            guildId={guildId}
             rows={2}
             value={welcomeMessage}
-            onChange={(e) => setWelcomeMessage(e.target.value)}
+            onChange={setWelcomeMessage}
           />
           <ul className="flex flex-col gap-0.5 text-xs text-zinc-500 dark:text-zinc-400">
             {TICKET_MESSAGE_VARIABLES.map((v) => (

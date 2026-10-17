@@ -11,6 +11,7 @@ import {
   renderWelcomeMessage,
 } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 import {
   ModuleToggle,
   SaveBar,
@@ -302,12 +303,12 @@ export function WelcomeForm({
                 <label className={labelClass} htmlFor="welcome-message">
                   Mensaje
                 </label>
-                <textarea
+                <MessageEditor
+                  guildId={guildId}
                   id="welcome-message"
-                  className={inputClass}
                   rows={3}
                   value={form.welcomeMessage}
-                  onChange={(e) => set("welcomeMessage", e.target.value)}
+                  onChange={(v) => set("welcomeMessage", v)}
                 />
                 <VariableList variables={WELCOME_MESSAGE_VARIABLES} />
               </div>
@@ -492,13 +493,13 @@ export function WelcomeForm({
                 <label className={labelClass} htmlFor="goodbye-message">
                   Mensaje
                 </label>
-                <textarea
+                <MessageEditor
+                  guildId={guildId}
                   id="goodbye-message"
-                  className={inputClass}
                   rows={3}
                   maxLength={1500}
                   value={form.goodbyeMessage}
-                  onChange={(e) => set("goodbyeMessage", e.target.value)}
+                  onChange={(v) => set("goodbyeMessage", v)}
                 />
                 <VariableList variables={GOODBYE_MESSAGE_VARIABLES} />
               </div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { REACTION_ROLE_MAX_OPTIONS, REACTION_ROLE_MODES } from "@hubbert/modules/client";
 import { EmbedPreview } from "@/components/embeds/EmbedPreview";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 
 interface Channel {
   id: string;
@@ -217,11 +218,11 @@ export function ReactionRolePanelForm({
 
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Descripción</label>
-          <textarea
-            className={inputClass}
+          <MessageEditor
+            guildId={guildId}
             rows={3}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={setDescription}
           />
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Debajo de la descripción se agrega automáticamente la lista de emojis con su rol.

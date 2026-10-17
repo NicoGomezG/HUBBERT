@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BIRTHDAY_MESSAGE_VARIABLES } from "@hubbert/modules/client";
 import { SettingRow, SettingsCard, Toggle } from "@/components/ui/settings";
+import { MessageEditor } from "@/components/ui/MessageEditor";
 
 interface Member {
   id: string;
@@ -196,11 +197,11 @@ export function BirthdayForm({
 
       <div className="flex flex-col gap-1">
         <label className={labelClass}>Mensaje personalizado</label>
-        <textarea
-          className={inputClass}
+        <MessageEditor
+          guildId={guildId}
           rows={2}
           value={customMessage}
-          onChange={(e) => setCustomMessage(e.target.value)}
+          onChange={setCustomMessage}
         />
         <ul className="flex flex-col gap-0.5 text-xs text-zinc-500 dark:text-zinc-400">
           {BIRTHDAY_MESSAGE_VARIABLES.map((v) => (

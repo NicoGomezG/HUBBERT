@@ -1,3 +1,5 @@
+import { DiscordMarkdown } from "./DiscordMarkdown";
+
 export interface EmbedPreviewField {
   name: string;
   value: string;
@@ -64,7 +66,9 @@ export function EmbedPreview({ data }: { data: EmbedPreviewData }) {
             )}
   
             {data.description && (
-              <p className="whitespace-pre-wrap text-sm text-zinc-300">{data.description}</p>
+              <p className="whitespace-pre-wrap text-sm text-zinc-300">
+                <DiscordMarkdown text={data.description} />
+              </p>
             )}
   
             {data.fields.length > 0 && (
@@ -72,7 +76,9 @@ export function EmbedPreview({ data }: { data: EmbedPreviewData }) {
                 {data.fields.map((field, i) => (
                   <div key={i} className={field.inline ? "col-span-1" : "col-span-3"}>
                     <p className="text-sm font-semibold text-white">{field.name || " "}</p>
-                    <p className="whitespace-pre-wrap text-sm text-zinc-300">{field.value || " "}</p>
+                    <p className="whitespace-pre-wrap text-sm text-zinc-300">
+                      {field.value ? <DiscordMarkdown text={field.value} /> : " "}
+                    </p>
                   </div>
                 ))}
               </div>
