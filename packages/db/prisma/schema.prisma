@@ -24,6 +24,7 @@ model User {
   reminders          Reminder[]
   ticketPanels       TicketPanel[]
   reactionRolePanels ReactionRolePanel[]
+  dmBroadcasts       DmBroadcast[]
 
   @@map("users")
 }
@@ -48,6 +49,7 @@ model Guild {
   tickets            Ticket[]
   reactionRolePanels ReactionRolePanel[]
   welcome            WelcomeSettings?
+  dmBroadcasts       DmBroadcast[]
 
   @@map("guilds")
 }
@@ -112,8 +114,9 @@ model Embed {
   lastSentAt      DateTime?
 
   guild  Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
-  author User         @relation(fields: [createdBy], references: [id])
-  fields EmbedField[]
+  author       User          @relation(fields: [createdBy], references: [id])
+  fields       EmbedField[]
+  dmBroadcasts DmBroadcast[]
 
   @@index([guildId])
   @@map("embeds")
@@ -370,4 +373,52 @@ model WelcomeSettings {
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
   @@map("welcome_settings")
+}
+
+/// Envío masivo de un embed por mensaje directo a los miembros con ciertos
+/// roles. Lo procesa apps/gateway de a un destinatario a la vez; como todo el
+/// estado vive acá, un reinicio del gateway retoma donde quedó.
+model DmBroadcast {
+  id         String    @id @default(uuid())
+  guildId    String
+  embedId    String?
+  /// Foto del embed al crear el envío: editarlo o borrarlo después no cambia
+  /// lo que reciben los que faltan.
+  embedName  String
+  payload    Json
+  roleIds    String[]
+  roleNames  String[]
+  /// pending | sending | done | cancelled
+  status     String    @default("pending")
+  total      Int
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  guild      Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  embed      Embed?                 @relation(fields: [embedId], references: [id], onDelete: SetNull)
+  creator    User                   @relation(fields: [createdBy], references: [id])
+  recipients DmBroadcastRecipient[]
+
+  @@index([guildId, createdAt])
+  @@index([status])
+  @@map("dm_broadcasts")
+}
+
+model DmBroadcastRecipient {
+  id            String    @id @default(uuid())
+  broadcastId   String
+  discordUserId String
+  /// pending | sent | closed (DMs cerrados) | failed
+  status        String    @default("pending")
+  attempts      Int       @default(0)
+  error         String?
+  sentAt        DateTime?
+
+  broadcast DmBroadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, discordUserId])
+  @@index([broadcastId, status])
+  @@map("dm_broadcast_recipients")
 }

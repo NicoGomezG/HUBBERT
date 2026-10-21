@@ -6,6 +6,7 @@ import {
   handleReactionAdd,
   handleReactionRemove,
   listReactionRolePanelMessageIds,
+  runBroadcastWorker,
   sendGoodbye,
   sendWelcome,
   type WelcomeMember,
@@ -128,8 +129,13 @@ client.on(GatewayDispatchEvents.GuildMemberRemove, ({ data }) => {
   });
 });
 
+// Cola de DMs masivos (ver packages/modules/src/broadcasts/worker.ts). Solo
+// debe correr en una réplica: dos instancias mandarían el mismo DM dos veces.
+const broadcastWorker = new AbortController();
+
 async function shutdown() {
   console.log("[gateway] cerrando…");
+  broadcastWorker.abort();
   await gateway.destroy();
   await prisma.$disconnect();
   process.exit(0);
@@ -141,6 +147,7 @@ process.on("SIGTERM", shutdown);
 async function main() {
   await refreshPanelMessageIds();
   setInterval(refreshPanelMessageIds, PANEL_REFRESH_MS);
+  void runBroadcastWorker(broadcastWorker.signal);
   await gateway.connect();
 }
 

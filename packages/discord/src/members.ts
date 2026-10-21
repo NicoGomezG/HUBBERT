@@ -30,3 +30,22 @@ export async function fetchGuildMembers(guildId: string): Promise<DiscordGuildMe
       avatarUrl: avatarUrl(m.user!.id, m.user!.avatar),
     }));
 }
+
+/** Ids de los miembros (sin bots) que tienen al menos uno de los roles. Recorre todo el servidor de a 1000. */
+export async function fetchMemberIdsWithRoles(guildId: string, roleIds: string[]): Promise<string[]> {
+  const wanted = new Set(roleIds);
+  const ids: string[] = [];
+  let after = "0";
+
+  for (;;) {
+    const page = (await getDiscordRest().get(Routes.guildMembers(guildId), {
+      query: new URLSearchParams({ limit: "1000", after }),
+    })) as APIGuildMember[];
+
+    for (const m of page) {
+      if (m.user && !m.user.bot && m.roles.some((r) => wanted.has(r))) ids.push(m.user.id);
+    }
+    if (page.length < 1000) return ids;
+    after = page[page.length - 1].user!.id;
+  }
+}

@@ -107,9 +107,10 @@ export async function listSendableChannels(guildId: string): Promise<DiscordText
   return fetchGuildTextChannels(guildId);
 }
 
-export async function sendEmbed(guildId: string, embedId: string, channelId: string) {
-  const embed = await getEmbed(guildId, embedId);
+type SavedEmbed = Awaited<ReturnType<typeof getEmbed>>;
 
+/** Valida un embed guardado y lo arma en el formato de la API de Discord. */
+export function toDiscordEmbed(embed: SavedEmbed): ReturnType<typeof buildDiscordEmbed> {
   const input = {
     title: embed.title,
     description: embed.description,
@@ -128,6 +129,12 @@ export async function sendEmbed(guildId: string, embedId: string, channelId: str
 
   const errors = validateEmbedInput(input);
   if (errors.length > 0) throw new EmbedValidationError(errors);
+  return buildDiscordEmbed(input);
+}
+
+export async function sendEmbed(guildId: string, embedId: string, channelId: string) {
+  const embed = await getEmbed(guildId, embedId);
+  const discordEmbed = toDiscordEmbed(embed);
 
   // El canal tiene que pertenecer a esta guild — evita usar el bot para
   // mandar mensajes a un canal de otro servidor pasando el id a mano.
@@ -136,7 +143,6 @@ export async function sendEmbed(guildId: string, embedId: string, channelId: str
     throw new EmbedValidationError(["El canal no pertenece a este servidor."]);
   }
 
-  const discordEmbed = buildDiscordEmbed(input);
   const message =
     embed.senderName || embed.senderAvatarUrl
       ? await sendEmbedAsWebhook(channelId, discordEmbed, {

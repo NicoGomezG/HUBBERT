@@ -6,6 +6,7 @@ export {
   updateEmbed,
   deleteEmbed,
   sendEmbed,
+  toDiscordEmbed,
   listSendableChannels,
   EmbedNotFoundError,
   EmbedValidationError,
@@ -98,3 +99,15 @@ export {
 export { welcomeSettingsInputSchema, welcomeTestSchema, type WelcomeSettingsInput } from "./welcome/schema";
 export { buildWelcomeCardUrl, parseWelcomeCardUrl, type WelcomeCardParams } from "./welcome/card";
 export { renderCardText, findCardFont, CARD_FONTS } from "./welcome/message";
+export {
+  listBroadcasts,
+  countBroadcastRecipients,
+  createBroadcast,
+  cancelBroadcast,
+  sendBroadcastTest,
+  BroadcastValidationError,
+  ACTIVE_BROADCAST_STATUSES,
+  type BroadcastCounts,
+} from "./broadcasts/service";
+export { broadcastInputSchema, broadcastTestSchema, type BroadcastInput } from "./broadcasts/schema";
+export { runBroadcastWorker } from "./broadcasts/worker";

@@ -19,6 +19,7 @@ function DiscordLogo() {
 
 type IconName =
   | "embeds"
+  | "masivos"
   | "bienvenida"
   | "reminders"
   | "birthdays"
@@ -36,6 +37,7 @@ type IconName =
 
 const ICON_PATHS: Record<IconName, string[]> = {
   embeds: ["M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", "M8 8h8", "M8 12h5"],
+  masivos: ["m3 11 18-5v12L3 14v-3z", "M11.6 16.8a3 3 0 1 1-5.8-1.6"],
   bienvenida: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "M19 16v5", "M16.5 18.5h5"],
   reminders: ["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10.3 21a1.94 1.94 0 0 0 3.4 0"],
   birthdays: [
@@ -94,6 +96,7 @@ const SECTIONS: { label: string; items: { slug: string; label: string; icon: Ico
     label: "Mensajes",
     items: [
       { slug: "embeds", label: "Embeds", icon: "embeds" },
+      { slug: "masivos", label: "Masivos", icon: "masivos" },
       { slug: "bienvenida", label: "Bienvenida", icon: "bienvenida" },
       { slug: "reminders", label: "Recordatorios", icon: "reminders" },
     ],

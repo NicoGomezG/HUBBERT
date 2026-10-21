@@ -14,6 +14,7 @@ const KNOWN_ERROR_TIPS: Record<number, string> = {
   10011: "Ese rol ya no existe en el servidor.",
   10014: "Discord no reconoce uno de los emojis. Usa un emoji estándar o uno custom de este servidor.",
   50035: "Discord rechazó el contenido del mensaje (probablemente supera algún límite de tamaño).",
+  40003: "Discord está frenando los mensajes privados del bot por mandar demasiados seguidos. Espera unos minutos.",
 };
 
 export function translateDiscordError(err: unknown): string {
