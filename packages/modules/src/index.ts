@@ -20,8 +20,10 @@ export {
   createBirthday,
   updateBirthday,
   deleteBirthday,
+  copyBirthdays,
   BirthdayNotFoundError,
   BirthdayDuplicateError,
+  type CopyBirthdaysSummary,
 } from "./birthdays/service";
 export { birthdayInputSchema, type BirthdayInput } from "./birthdays/schema";
 export { sendDueBirthdayNotifications, type BirthdayRunSummary } from "./birthdays/notify";

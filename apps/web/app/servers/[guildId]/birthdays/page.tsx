@@ -47,12 +47,22 @@ export default async function BirthdaysPage({
             Se felicitan automáticamente el día que corresponde.
           </p>
         </div>
-        <Link
-          href={`/servers/${guildId}/birthdays/new`}
-          className="rounded-md bg-[#5865F2] px-3 py-2 text-sm font-medium text-white hover:bg-[#4752C4]"
-        >
-          + Nuevo cumpleaños
-        </Link>
+        <div className="flex gap-2">
+          {birthdays.length > 0 && (
+            <Link
+              href={`/servers/${guildId}/birthdays/copy`}
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            >
+              Copiar a otro servidor
+            </Link>
+          )}
+          <Link
+            href={`/servers/${guildId}/birthdays/new`}
+            className="rounded-md bg-[#5865F2] px-3 py-2 text-sm font-medium text-white hover:bg-[#4752C4]"
+          >
+            + Nuevo cumpleaños
+          </Link>
+        </div>
       </div>
 
       {birthdays.length === 0 && (

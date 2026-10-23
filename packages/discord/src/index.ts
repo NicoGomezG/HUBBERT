@@ -25,7 +25,7 @@ export {
   type DiscordTextChannel,
   type CreateTicketChannelInput,
 } from "./channels";
-export { fetchGuildMembers, fetchMemberIdsWithRoles, type DiscordGuildMember } from "./members";
+export { fetchGuildMembers, fetchMemberIdsWithRoles, fetchAllMemberIds, type DiscordGuildMember } from "./members";
 export {
   fetchGuildManageRoles,
   fetchAssignableRoles,
